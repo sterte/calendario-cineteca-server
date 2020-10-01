@@ -37,13 +37,15 @@ const parseMovieDetail = (html, originalUrl) => {
     }
 
     var durata = paragraphs.length > 0 ? paragraphs[0].innerHTML : '';
+    /*
     if(durata.length){        
         const to = durata.indexOf('<br>');
         if(to > -1){
             durata = durata.substr(0, to);    
         }        
         durata = durata.replace(/<[^>]*>/g, '');        
-    }
+    }*/
+    durata = '<p>'+durata+'</p>';
 
     var sinossi = '';
     if(paragraphs[0].getElementsByTagName('span').length > 0){
