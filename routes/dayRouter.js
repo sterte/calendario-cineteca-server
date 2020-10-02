@@ -13,9 +13,67 @@ dayRouter.use(bodyParser.json());
 const parseDayProgram = (html) => {    
     const parser = new DOMParser();
     const parsed = parser.parseFromString(html, 'text/html');    
+    const movies = parsed.getElementById('archiveReplace').childNodes;//.getElementsByTagName('article');
+
+    
+    var i;
+    var moviesJson = [];
+    var tmpMovies = [];
+    var currentDay;
+    for(i=0; i<movies.length; i++){                
+        if(movies[i].getAttribute('class') && movies[i].getAttribute('class').indexOf('repeatDayName') > -1){
+            if(tmpMovies.length){
+                moviesJson.push({day: currentDay, movies: tmpMovies});
+                tmpMovies = [];
+            }            
+            currentDay = movies[i].getAttribute('date');                        
+        }
+        else if(movies[i].getAttribute('class') && movies[i].getAttribute('class').indexOf('itemLoop') > -1){
+            const movie = movies[i];                                    
+            const id = movie.getAttribute('id');                        
+            var tmpData = movie.getElementsByClassName('content');            
+            if(tmpData){
+                tmpData = tmpData[0].getElementsByTagName('a')[0];        
+                const url = tmpData.getAttribute('href');
+                const title = tmpData.getElementsByTagName('h5')[0].textContent;         
+                const place = movie.getElementsByClassName('place')[0].textContent;
+                const time = movie.getElementsByClassName('time')[0].textContent;        
+                var image = movie.getElementsByClassName('cover')[0].getAttribute('style');
+                image = image.substr(image.indexOf('http')).slice(0, -1);        
+
+                var isVO = false;
+                var isMUSIC = false;
+                const icons = movie.getElementsByClassName('iconSet');
+                if(icons.length){
+                    isVO = icons[0].getElementsByClassName('originalVersion').length ? true : false;
+                    isMUSIC = false; //TODO
+                }
+
+                tmpMovies.push({           
+                    key: i,
+                    id: id,             
+                    title: title,
+                    place: place,
+                    time: time,
+                    url: url,
+                    image: image,
+                    isVO: isVO,
+                    isMUSIC: isMUSIC
+                });  
+            }        
+                       
+        }
+    }
+    
+    return moviesJson;
+}
+
+/* PARSING OLD CINETECA WEBPAGE
+const parseDayProgramOLD = (html) => {    
+    const parser = new DOMParser();
+    const parsed = parser.parseFromString(html, 'text/html');    
     const day = parsed.getElementById("elenco_giorno");    
-    const movies = day.getElementsByClassName('clearfix');
-    //const movies = parsed.getElementsByClassName('clearfix');
+    const movies = day.getElementsByClassName('clearfix');    
     var i;
     var moviesJson = { movies: []};
     for(i=0; i<movies.length; i++){
@@ -82,20 +140,21 @@ const parseDayProgram = (html) => {
     }    
     return moviesJson;    
 }
-
+*/
 
 dayRouter.route('*')
 .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 
-dayRouter.route('/:year/:month/:day')
+dayRouter.route('/:from/:to')
 .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
-.get(cors.cors, (req, res, next) => {
-    const url= cinetecaUrl + '/vedere/programmazione/dp_dt_'+req.params.year+'/'+req.params.month+'/'+req.params.day;    
+.get(cors.cors, (req, res, next) => {    
+    const url = cinetecaUrl + '/programma/?from='+ req.params.from +'&to='+ req.params.to;
     return fetch(url, {headers:{
         contentType: "text/html; charset=iso-8859-1",
       }})        
     .then(res => res.text())    
     .then(html => {
+        //console.log(html);
         res.setHeader('Content-Type', 'application/json');
         res.statusCode = 200;
         var result = parseDayProgram(html);
