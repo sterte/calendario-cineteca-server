@@ -29,12 +29,14 @@ const parseDayProgram = (html) => {
             currentDay = movies[i].getAttribute('date');                        
         }
         else if(movies[i].getAttribute('class') && movies[i].getAttribute('class').indexOf('itemLoop') > -1){
-            const movie = movies[i];                                    
-            const id = movie.getAttribute('id');                        
+            const movie = movies[i];                                                
             var tmpData = movie.getElementsByClassName('content');            
             if(tmpData){
                 tmpData = tmpData[0].getElementsByTagName('a')[0];        
                 const url = tmpData.getAttribute('href');
+                const from = url.indexOf('proiezione/') + 'proiezione/'.length;
+                const to = url.indexOf('/', from);
+                const id = url.substr(from, to-from);                                
                 const title = tmpData.getElementsByTagName('h5')[0].textContent;         
                 const place = movie.getElementsByClassName('place')[0].textContent;
                 const time = movie.getElementsByClassName('time')[0].textContent;        
