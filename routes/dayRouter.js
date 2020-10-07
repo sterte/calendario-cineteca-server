@@ -173,7 +173,6 @@ dayRouter.route('/:from/:to')
       }})        
     .then(res => res.text())    
     .then(html => {
-        //console.log(html);
         res.setHeader('Content-Type', 'application/json');
         res.statusCode = 200;
         var result = parseDayProgram(html);
