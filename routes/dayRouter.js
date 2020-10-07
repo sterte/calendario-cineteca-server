@@ -10,7 +10,8 @@ const dayRouter = express.Router();
 dayRouter.use(bodyParser.json());
 
 
-const parseDayProgram = (html) => {    
+const parseDayProgram = (html) => {  
+    try{  
     const parser = new DOMParser();
     const parsed = parser.parseFromString(html, 'text/html');    
     const movies = parsed.getElementById('archiveReplace').childNodes;//.getElementsByTagName('article');
@@ -34,14 +35,23 @@ const parseDayProgram = (html) => {
             if(tmpData){
                 tmpData = tmpData[0].getElementsByTagName('a')[0];        
                 const url = tmpData.getAttribute('href');
-                const from = url.indexOf('proiezione/') + 'proiezione/'.length;
-                const to = url.indexOf('/', from);
-                const id = url.substr(from, to-from);                                
+                
+                var tmpUrl = url;
+                var from = tmpUrl.indexOf('bologna.it/') + 'bologna.it/'.length;                
+                tmpUrl = tmpUrl.substr(from);
+
+                var aaa = tmpUrl.split('/');
+                const categoryId = aaa[0];
+                const movieId = aaa[1];
+                const repeatId = aaa[2].substr(1);
+
                 const title = tmpData.getElementsByTagName('h5')[0].textContent;         
                 const place = movie.getElementsByClassName('place')[0].textContent;
                 const time = movie.getElementsByClassName('time')[0].textContent;        
-                var image = movie.getElementsByClassName('cover')[0].getAttribute('style');
+                var imageAndExtras = movie.getElementsByClassName('coverWrap');
+                var image = imageAndExtras[0].getElementsByClassName('cover')[0].getAttribute('style');
                 image = image.substr(image.indexOf('http')).slice(0, -1);        
+                const extras = imageAndExtras[0].getElementsByClassName('label').length > 0 ? imageAndExtras[0].getElementsByClassName('label')[0].innerHTML : '';
 
                 var isVO = false;
                 var isMUSIC = false;
@@ -53,14 +63,17 @@ const parseDayProgram = (html) => {
 
                 tmpMovies.push({           
                     key: i,
-                    id: id,             
+                    id: movieId,     
+                    categoryId: categoryId,  
+                    repeatId: repeatId,
                     title: title,
                     place: place,
                     time: time,
                     url: url,
                     image: image,
                     isVO: isVO,
-                    isMUSIC: isMUSIC
+                    isMUSIC: isMUSIC,
+                    extras: extras
                 });  
             }        
                        
@@ -68,6 +81,9 @@ const parseDayProgram = (html) => {
     }
     
     return moviesJson;
+}catch(error){
+    console.log(err);
+}
 }
 
 /* PARSING OLD CINETECA WEBPAGE
@@ -151,6 +167,7 @@ dayRouter.route('/:from/:to')
 .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 .get(cors.cors, (req, res, next) => {    
     const url = cinetecaUrl + '/programma/?from='+ req.params.from +'&to='+ req.params.to;
+    console.log(url);
     return fetch(url, {headers:{
         contentType: "text/html; charset=iso-8859-1",
       }})        
