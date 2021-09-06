@@ -18,11 +18,12 @@ const parseMovieDetail = (html, originalUrl) => {
 
         const title = parsed.getElementsByClassName('postTitle').length > 0 ? parsed.getElementsByClassName('postTitle')[0].innerHTML : '';                
         var durata = parsed.getElementsByClassName('infoTitle').length > 0 ? parsed.getElementsByClassName('infoTitle')[0].innerHTML : '';        
-        var image = parsed.getElementsByClassName('backgroundCover').length > 0 ? parsed.getElementsByClassName('backgroundCover')[0].getAttribute('style') : '';            
+        var image = parsed.getElementsByClassName('mainSection')[0].getElementsByClassName('backgroundCover').length > 0 ? parsed.getElementsByClassName('mainSection')[0].getElementsByClassName('backgroundCover')[0].getAttribute('style') : '';             
+        console.log("IMAGE="+image);
         const from = image.indexOf('url(')+4;
         const to = image.indexOf(')', from);        
         image = image.substr(from, to-from);                
-
+console.log("IMAGE="+image)
         const buyLink = parsed.getElementsByClassName('buyButtonWrap').length > 0 ?  parsed.getElementsByClassName('buyButtonWrap')[0].getElementsByTagName('a')[0].getAttribute('href') : '';
         
         var sinossi;
@@ -37,7 +38,7 @@ const parseMovieDetail = (html, originalUrl) => {
         }
 
         //const costi = parsed.getElementsByClassName('costi')[0].innerHTML.replace(/<a .*<\/a>/g, '').replace('h2', 'h5');    
-        const extras = parsed.getElementsByClassName('specialEventWrap').length > 0 ? parsed.getElementsByClassName('specialEventWrap')[0].getElementsByClassName('label')[0].innerHTML : '';
+        const extras = parsed.getElementsByClassName('specialEventWrap').length > 0 ? parsed.getElementsByClassName('specialEventWrap')[0].getElementsByClassName('mainLabel')[0].innerHTML : '';
 
         var pagRepliche = parsed.getElementsByClassName('sameRepeats');    
         var days = [];
