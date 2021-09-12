@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('./cors');
 const fetch = require('node-fetch');
+const parseUtils = require('../parseUtils')
 const DOMParser = require('dom-parser');
 const { cinetecaUrl } = require('../shared/baseUrl');
 
@@ -98,6 +99,7 @@ movieRouter.route('/:categoryId/:movieId/:repeatId')
         contentType: "text/html; charset=iso-8859-1",
       }})    
     .then(res => res.text())
+    .then((res) => parseUtils.forceCharachtersEncoding(res))
     .then(html => {
         const details = parseMovieDetail(html, url);
         if(details.errMess){
@@ -107,8 +109,8 @@ movieRouter.route('/:categoryId/:movieId/:repeatId')
             res.json(details);
         }        
     })    
-    .catch((err) => next(err));
-})
+    .catch((err) => {console.log(err); next(err)});
+}, (err) => {console.log(err); next(err)})
 .post(cors.cors, (req, res, next) => {
     res.statusCode = 403;
     res.end('PUT operation not supported for /movies');

@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('./cors');
 const fetch = require('node-fetch');
+const parseUtils = require('../parseUtils')
 const DOMParser = require('dom-parser');
 const { cinetecaUrl } = require('../shared/baseUrl');
 
@@ -172,16 +173,17 @@ dayRouter.route('/:from/:to')
         contentType: "text/html; charset=iso-8859-1",
       }})        
     .then(res => res.text())    
+    .then((res) => parseUtils.forceCharachtersEncoding(res))
     .then(html => {
         res.setHeader('Content-Type', 'application/json');
         res.statusCode = 200;
         var result = parseDayProgram(html);
         res.json(result);
     })
-    .catch((err) => next(err));    
+    .catch((err) => {console.log(err); next(err)});    
 
 
-}, (err) => next(err))
+}, (err) => {console.log(err); next(err)})
 .post(cors.cors, (req, res, next) => {
     res.statusCode = 403;
     res.end('PUT operation not supported for /days');
