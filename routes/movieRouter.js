@@ -24,7 +24,7 @@ const parseMovieDetail = (html, originalUrl) => {
         const to = image.indexOf(')', from);        
         image = image.substr(from, to-from);                
 console.log("IMAGE="+image)
-        const buyLink = parsed.getElementsByClassName('buyButtonWrap').length > 0 ?  parsed.getElementsByClassName('buyButtonWrap')[0].getElementsByTagName('a')[0].getAttribute('href') : '';
+        const buyLink = parsed.getElementsByClassName('getTicketSection').length > 0 ?  parsed.getElementsByClassName('ticketButton')[0].getElementsByTagName('a')[0].getAttribute('href') : '';
         
         var sinossi;
         if(parsed.getElementsByClassName('movieDescription').length > 0){
