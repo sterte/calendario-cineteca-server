@@ -19,12 +19,13 @@ const parseMovieDetail = (html, originalUrl) => {
         const title = parsed.getElementsByClassName('postTitle').length > 0 ? parsed.getElementsByClassName('postTitle')[0].innerHTML : '';                
         var durata = parsed.getElementsByClassName('infoTitle').length > 0 ? parsed.getElementsByClassName('infoTitle')[0].innerHTML : '';        
         var image = parsed.getElementsByClassName('mainSection')[0].getElementsByClassName('backgroundCover').length > 0 ? parsed.getElementsByClassName('mainSection')[0].getElementsByClassName('backgroundCover')[0].getAttribute('style') : '';             
-        console.log("IMAGE="+image);
+
         const from = image.indexOf('url(')+4;
         const to = image.indexOf(')', from);        
         image = image.substr(from, to-from);                
-console.log("IMAGE="+image)
-        const buyLink = parsed.getElementsByClassName('getTicketSection').length > 0 ?  parsed.getElementsByClassName('ticketButton')[0].getElementsByTagName('a')[0].getAttribute('href') : '';
+        
+        var buyLink = parsed.getElementsByClassName('ticketButton').length > 0 ? parsed.getElementsByClassName('ticketButton') : '';
+        buyLink = buyLink.length > 0 ?  buyLink[0].getElementsByTagName('a')[0].getAttribute('href') : '';
         
         var sinossi;
         if(parsed.getElementsByClassName('movieDescription').length > 0){
