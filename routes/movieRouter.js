@@ -37,6 +37,8 @@ console.log("IMAGE="+image)
             sinossi = '';
         }
 
+        const isVO = parsed.getElementsByClassName('languageSideItem')[0].getElementsByClassName('originalVersion').length;
+        
         //const costi = parsed.getElementsByClassName('costi')[0].innerHTML.replace(/<a .*<\/a>/g, '').replace('h2', 'h5');    
         const extras = parsed.getElementsByClassName('specialEventWrap').length > 0 ? parsed.getElementsByClassName('specialEventWrap')[0].getElementsByClassName('mainLabel')[0].innerHTML : '';
 
@@ -76,7 +78,7 @@ console.log("IMAGE="+image)
             }
         }        
                 
-        movie = {title: title, duration: durata, summary: sinossi, image: image, currentHour: currentHour, hours: days, originalUrl: originalUrl, buyLink: buyLink, extras: extras};        
+        movie = {title: title, duration: durata, summary: sinossi, image: image, currentHour: currentHour, hours: days, originalUrl: originalUrl, buyLink: buyLink, extras: extras, isVO: isVO};        
         return movie;
     }catch(error){
         console.log(error)
