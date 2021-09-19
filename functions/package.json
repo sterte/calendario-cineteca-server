@@ -1,10 +1,17 @@
 {
-  "name": "calendario-cineteca-server",
-  "version": "0.0.0",
-  "private": true,
+  "name": "functions",
+  "description": "Cloud Functions for Firebase",
   "scripts": {
-    "start": "node ./bin/www"
+    "serve": "firebase emulators:start --only functions",
+    "shell": "firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
   },
+  "engines": {
+    "node": "10"
+  },
+  "main": "index.js",
   "dependencies": {
     "body-parser": "^1.19.0",
     "compression": "^1.7.4",
@@ -14,6 +21,8 @@
     "dom-parser": "^0.1.6",
     "express": "~4.16.0",
     "express-session": "^1.17.1",
+    "firebase-admin": "^8.10.0",
+    "firebase-functions": "^3.6.1",
     "helmet": "^4.6.0",
     "html-encoder-decoder": "^1.3.9",
     "http-errors": "~1.6.2",
@@ -25,5 +34,9 @@
     "passport-jwt": "^4.0.0",
     "passport-local-mongoose": "^6.0.1",
     "session-file-store": "^1.4.0"
-  }
+  },
+  "devDependencies": {
+    "firebase-functions-test": "^0.2.0"
+  },
+  "private": true
 }

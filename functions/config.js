@@ -3,7 +3,8 @@ const secrets = require('./secrets');
 
 module.exports = {
     'secretKey': secrets.secretMain,
-    'mongoUrl': 'mongodb://localhost:27017/calendarioCineteca'/*,
+    'mongoUrl': 'mongodb+srv://cinetecalendar:lKa9YpNKufvIMKLE@cluster-sterte.ommw6.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'
+    /*,
     'facebook' : {
         clientId: '397746814547445',
         clientSecret: secrets.secretFacebook,
