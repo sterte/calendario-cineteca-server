@@ -39,7 +39,7 @@ const parseMovieDetail = (html, originalUrl) => {
             sinossi = '';
         }
 
-        const isVO = parsed.getElementsByClassName('languageSideItem')[0].getElementsByClassName('originalVersion').length;
+        const isVO = parsed.getElementsByClassName('languageSideItem').length > 0 ? parsed.getElementsByClassName('languageSideItem')[0].getElementsByClassName('originalVersion').length : false;        
         
         //const costi = parsed.getElementsByClassName('costi')[0].innerHTML.replace(/<a .*<\/a>/g, '').replace('h2', 'h5');    
         const extras = parsed.getElementsByClassName('specialEventWrap').length > 0 ? parsed.getElementsByClassName('specialEventWrap')[0].getElementsByClassName('mainLabel')[0].innerHTML : '';
