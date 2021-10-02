@@ -18,7 +18,8 @@ const parseMovieDetail = (html, originalUrl) => {
         const parsed = parser.parseFromString(html, 'text/html');    
 
         const title = parsed.getElementsByClassName('postTitle').length > 0 ? parsed.getElementsByClassName('postTitle')[0].innerHTML : '';                
-        var durata = parsed.getElementsByClassName('infoTitle').length > 0 ? parsed.getElementsByClassName('infoTitle')[0].innerHTML : '';        
+        var durata = parsed.getElementsByClassName('infoTitle').length > 0 ? parsed.getElementsByClassName('infoTitle')[0].innerHTML : '';  
+        durata = durata.replace(/<[^>]*>?/gm, '');      
         var image = parsed.getElementsByClassName('mainSection')[0].getElementsByClassName('backgroundCover').length > 0 ? parsed.getElementsByClassName('mainSection')[0].getElementsByClassName('backgroundCover')[0].getAttribute('style') : '';             
 
         const from = image.indexOf('url(')+4;
