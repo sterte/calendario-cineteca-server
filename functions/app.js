@@ -70,3 +70,7 @@ app.use(function(err, req, res, next) {
 });
 
 module.exports = app;
+
+const PORT=3000;
+app.listen(PORT);
+exports.app = functions.https.onRequest(app);
