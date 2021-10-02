@@ -33,15 +33,12 @@ const parseDayProgram = (html) => {
         else if(movies[i].getAttribute('class') && movies[i].getAttribute('class').indexOf('itemLoop') > -1){
             const movie = movies[i];          
             tmpMovies.push(parseUtils.parseMovie(movie, i));                                                          
-            }        
-                       
-        }
-    }
-    
+        }                               
+    }        
     return moviesJson;
-}catch(error){
-    console.log(err);
-}
+    }catch(error){
+        console.log(err);
+    }
 }
 
 /* PARSING OLD CINETECA WEBPAGE
