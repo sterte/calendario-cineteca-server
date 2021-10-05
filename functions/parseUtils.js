@@ -41,7 +41,6 @@ exports.parseMovie = (movie, key = -1) => {
         if(specialInfo.length){
             specialInfo = specialInfo[0]     
             specialInfo = specialInfo.getElementsByClassName('infoItem');                  
-            console.log('infoitems: ' + specialInfo.length)
             for(let i=0; i<specialInfo.length;i++){
                 let infoItem = specialInfo[i]                
                 infoItem = infoItem.getElementsByClassName('infoText');
