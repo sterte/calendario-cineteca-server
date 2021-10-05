@@ -37,7 +37,7 @@ const parseDayProgram = (html) => {
     }        
     return moviesJson;
     }catch(error){
-        console.log(err);
+        console.log(error);
     }
 }
 
