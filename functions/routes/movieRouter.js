@@ -43,7 +43,17 @@ const parseMovieDetail = (html, originalUrl) => {
         const isVO = parsed.getElementsByClassName('languageSideItem').length > 0 ? parsed.getElementsByClassName('languageSideItem')[0].getElementsByClassName('originalVersion').length : false;        
         
         //const costi = parsed.getElementsByClassName('costi')[0].innerHTML.replace(/<a .*<\/a>/g, '').replace('h2', 'h5');    
-        const extras = parsed.getElementsByClassName('specialEventWrap').length > 0 ? parsed.getElementsByClassName('specialEventWrap')[0].getElementsByClassName('mainLabel')[0].innerHTML : '';
+        let extras = parsed.getElementsByClassName('specialEventWrap');
+        let extrasString = '';
+        if(extras.length > 0){
+            extras = parsed.getElementsByClassName('specialEventWrap')[0];            
+            extrasString = extras.getElementsByClassName('mainLabel').length > 0 ? extras.getElementsByClassName('mainLabel')[0].innerHTML : '';
+            extras = extras.getElementsByClassName('repeatInfo');                  
+            for(let i=0;i<extras.length;i++){                          
+                let extra = extras[i];
+                extrasString = extrasString + '<br>' + extra.innerHTML;
+            }            
+        }
 
         var pagRepliche = parsed.getElementsByClassName('sameRepeats');    
         var days = [];
@@ -81,7 +91,7 @@ const parseMovieDetail = (html, originalUrl) => {
             }
         }        
                 
-        movie = {title: title, duration: durata, summary: sinossi, image: image, currentHour: currentHour, hours: days, originalUrl: originalUrl, buyLink: buyLink, extras: extras, isVO: isVO};        
+        movie = {title: title, duration: durata, summary: sinossi, image: image, currentHour: currentHour, hours: days, originalUrl: originalUrl, buyLink: buyLink, extras: extrasString, isVO: isVO};        
         return movie;
     }catch(error){
         console.log(error)

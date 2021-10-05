@@ -35,7 +35,28 @@ exports.parseMovie = (movie, key = -1) => {
         var imageAndExtras = movie.getElementsByClassName('coverWrap');
         var image = imageAndExtras[0].getElementsByClassName('cover')[0].getAttribute('style');
         image = image.substr(image.indexOf('http')).slice(0, -1);        
-        const extras = imageAndExtras[0].getElementsByClassName('label').length > 0 ? imageAndExtras[0].getElementsByClassName('label')[0].innerHTML : '';
+        let extras = imageAndExtras[0].getElementsByClassName('label').length > 0 ? imageAndExtras[0].getElementsByClassName('label')[0].innerHTML : '';
+        let specialInfo = movie.getElementsByClassName('specialInfo');
+        let specialInfoText = "";
+        if(specialInfo.length){
+            specialInfo = specialInfo[0]     
+            specialInfo = specialInfo.getElementsByClassName('infoItem');                  
+            console.log('infoitems: ' + specialInfo.length)
+            for(let i=0; i<specialInfo.length;i++){
+                let infoItem = specialInfo[i]                
+                infoItem = infoItem.getElementsByClassName('infoText');
+                if(infoItem.length){
+                    infoItem = infoItem[0].getElementsByTagName('p');
+                    if(infoItem.length){
+                        for(let j=0;j<infoItem.length;j++){
+                            let item = infoItem[j];
+                            extras = extras + '<br>' + item.innerHTML;
+                        }                            
+                    }                        
+                }                           
+            }            
+        }
+        extras = '<p>' + extras + '</p>';
         
         var isVO = false;
         var isMUSIC = false;
