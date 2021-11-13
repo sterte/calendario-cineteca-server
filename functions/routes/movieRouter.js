@@ -58,16 +58,20 @@ const parseMovieDetail = (html, originalUrl) => {
         var pagRepliche = parsed.getElementsByClassName('sameRepeats');    
         var days = [];
         var hours = [];
+        var place = "";
         var oldData;
         var currentHour;
 
         if(parsed.getElementsByClassName('overTitle').length > 0){
-            data = parsed.getElementsByClassName('overTitle')[0];
+            replica = parsed.getElementsByClassName('overTitle')[0];
             const weekDay =  parsed.getElementsByClassName('datel')[0].innerHTML.substr(0,3) + ' ';
-            const hours = data.getElementsByClassName('hours')[0].innerHTML;
-            data = data.getElementsByClassName('date')[0];
-            data = weekDay + ' ' + data.getElementsByClassName('dated')[0].innerHTML + ' ' + data.getElementsByClassName('dateM')[0].innerHTML + ' ' + data.getElementsByClassName('dateY')[0].innerHTML.substr(2);        
-            currentHour = {day: data, hours: [hours]};
+            const hours = replica.getElementsByClassName('hours')[0].innerHTML;
+            data = replica.getElementsByClassName('date')[0];
+            data = weekDay + ' ' + data.getElementsByClassName('dated')[0].innerHTML + ' ' + data.getElementsByClassName('dateM')[0].innerHTML + ' ' + data.getElementsByClassName('dateY')[0].innerHTML.substr(2);                    
+            if(replica.getElementsByClassName('place').length > 0){
+                place = replica.getElementsByClassName('place')[0].getElementsByTagName('a')[0].innerHTML;
+            }
+            currentHour = {place : place, day: data, hours: [hours]};
         } 
 
         if(pagRepliche.length>0){
@@ -78,15 +82,18 @@ const parseMovieDetail = (html, originalUrl) => {
                     var data = pagRepliche[i].getElementsByClassName('date')[0];
                     data = data.getElementsByClassName('dateD')[0].innerHTML + ' ' + data.getElementsByClassName('datej')[0].innerHTML + ' ' + data.getElementsByClassName('dateM')[0].innerHTML + ' ' + data.getElementsByClassName('datey')[0].innerHTML;
                     if(data != oldData && oldData != null){
-                        days.push({day: oldData, hours: hours});
+                        days.push({place: oldLuogo, day: oldData, hours: hours});
                         hours = [];
+                        place = "";
                     }
                     const orario = pagRepliche[i].getElementsByClassName('time')[0].innerHTML;
+                    const luogo = pagRepliche[i].getElementsByClassName('place')[0].innerHTML;
                     hours.push(orario);        
                     if(i == pagRepliche.length-1){
-                        days.push({day: data, hours: hours});
+                        days.push({place: luogo, day: data, hours: hours});
                     }
-                    oldData=data;
+                    oldData = data;
+                    oldLuogo = luogo;
                 }
             }
         }        
