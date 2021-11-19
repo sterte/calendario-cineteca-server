@@ -65,7 +65,7 @@ const parseMovieDetail = (html, originalUrl) => {
         if(parsed.getElementsByClassName('overTitle').length > 0){
             replica = parsed.getElementsByClassName('overTitle')[0];
             const weekDay =  parsed.getElementsByClassName('datel')[0].innerHTML.substr(0,3) + ' ';
-            const hours = {isVO: false, additionalInfo:extrasString, orario: replica.getElementsByClassName('hours')[0].innerHTML};
+            const hours = {isVO: isVO, additionalInfo:extrasString, orario: replica.getElementsByClassName('hours')[0].innerHTML};
             data = replica.getElementsByClassName('date')[0];
             data = weekDay + ' ' + data.getElementsByClassName('dated')[0].innerHTML + ' ' + data.getElementsByClassName('dateM')[0].innerHTML + ' ' + data.getElementsByClassName('dateY')[0].innerHTML.substr(2);                    
             if(replica.getElementsByClassName('place').length > 0){
