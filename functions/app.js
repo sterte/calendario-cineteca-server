@@ -17,6 +17,7 @@ var daysRouter = require('./routes/dayRouter');
 var moviesRouter = require('./routes/movieRouter');
 var favouritesRouter = require('./routes/favouriteRouter');
 var trackRouter = require('./routes/trackRouter');
+var chatRouter = require('./routes/chatRouter');
 
 const mongoose = require('mongoose');
 const { signedCookies } = require('cookie-parser');
@@ -52,6 +53,7 @@ app.use('/days', daysRouter);
 app.use('/movies', moviesRouter);
 app.use('/favourites', favouritesRouter);
 app.use('/tracks', trackRouter);
+app.use('/chat', chatRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
