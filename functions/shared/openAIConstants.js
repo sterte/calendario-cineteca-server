@@ -1,5 +1,5 @@
 exports.url = 'https://api.openai.com';
-exports.token = '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';
+exports.token = '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';
 exports.organizationId = 'org-zYj4x9Ta9XVh0quweXELOPLy';
 exports.model = "gpt-3.5-turbo";
 exports.temperature = 0.8;
