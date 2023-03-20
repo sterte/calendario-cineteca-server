@@ -22,12 +22,12 @@ chatRouter.route('/prompt')
     if(!conversationId){
         var charachter = req.body.charachter;
         if(!charachter){
-            err = new Error('Malformed request: no cahrachter selected, no conversationId given.');
+            err = new Error('Malformed request: no charachter selected, no conversationId given.');
             err.status = 400;
             return next(err);
         }
         conversationId = new Date().getTime();
-        lastMessages = openAIConstants.initialMessages[charachter];
+        lastMessages = [... openAIConstants.initialMessages[charachter]];
     } else {
         lastMessages = myCache.get(conversationId);
     }
@@ -73,7 +73,8 @@ chatRouter.route('/prompt')
     .then(gptRes => gptRes.json())    
     .then(gptRes => {
         var result = {
-            "content": gptRes,
+            "role": gptRes.choices[0].message.role,
+            "content": gptRes.choices[0].message.content,
             "conversationId": conversationId
         }
         var lastMessages = myCache.get(conversationId);
