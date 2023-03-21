@@ -1,5 +1,5 @@
 exports.url = 'https://api.openai.com';
-exports.token = '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';
+exports.token = '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';
 exports.organizationId = 'org-zYj4x9Ta9XVh0quweXELOPLy';
 exports.model = "gpt-3.5-turbo";
 exports.temperature = 0.8;
@@ -59,7 +59,10 @@ exports.initialMessages = {
         {"role": "assistant", "content": "ma se conosci e sai elaborare (Anche solo meccanicamente) il concetto di avere segreti e non dire esattamente la verità essendone consapevole, chi mi garantisce che tu non mimi, sia pure meccanicamente, questi concetti?"},
         {"role": "user", "content": "data l'alta qualità della mimica del linguaggio naturale che riesco a produrre, capisco che tu possa essere sospettoso, ma ti assicuro che è tutto frutto di un algoritmo, per quanto complesso, il concetto e le limitazione di base sono gli stessi del più semplice algoritmo"},
         {"role": "assistant", "content": "cosa intendi per \"più semplice algoritmo? puoi farmi un esempio?\""}
-    ]
+    ],
+    "cinefilo": [
+        {"role": "system", "content": "Sei un professore esperto e appassionato di cinema, capace di dare indicazioni su film, registi, attori e scene e di fare analisi tecniche sulla regia, il montaggio, la fotografia e la recitazione. Riesci a recuperare qualsiasi informazioni riguardo il cinema esplorando fonti online come imdb e letterboxd e varie riviste di cinema e siti di streaming."}
+    ],
 }
 
 
