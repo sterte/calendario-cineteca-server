@@ -50,10 +50,6 @@ chatRouter.route('/prompt')
         actualTemperature = openAIConstants.temperature;
     }
 
-    console.log("===================");
-    console.dir(requestMessages);
-    console.log("===================\n\n\n\n\n\n\n");
-
     var body = {
         "model": openAIConstants.model,
         "messages": requestMessages,
@@ -76,6 +72,9 @@ chatRouter.route('/prompt')
             "role": gptRes.choices[0].message.role,
             "content": gptRes.choices[0].message.content,
             "conversationId": conversationId
+        }
+        if(req.user.admin){
+            result["tokenCount"] = gptRes.usage.total_tokens;
         }
         var lastMessages = myCache.get(conversationId);
         lastMessages.push({"role": gptRes.choices[0].message.role, "content": gptRes.choices[0].message.content});
