@@ -70,7 +70,8 @@ chatRouter.route('/prompt')
         var result = {
             "role": gptRes.choices[0].message.role,
             "content": gptRes.choices[0].message.content,
-            "conversationId": conversationId
+            "conversationId": conversationId,
+            "timestamp": gptRes.created
         }
         if(req.user.admin){
             result["tokenCount"] = gptRes.usage.total_tokens;
