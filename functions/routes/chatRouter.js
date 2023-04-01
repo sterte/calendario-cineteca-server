@@ -5,11 +5,20 @@ const authenticate = require('../authenticate');
 const fetch = require('node-fetch');
 const openAIConstants = require('../shared/openAIConstants');
 const NodeCache = require('node-cache');
+const AiConversation = require('../models/aiConversation');
+const AiMessage = require('../models/aiMessage');
 var myCache = new NodeCache();
 
 const chatRouter = express.Router();
 
 chatRouter.use(bodyParser.json());
+
+chatRouter.route('/charachters')
+.options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
+.get(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+    let result = openAIConstants.initialMessages.map(el => {return {"value": el.name, "label": el.description}})
+    res.json(result)
+})
 
 chatRouter.route('/prompt')
 .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
@@ -18,7 +27,10 @@ chatRouter.route('/prompt')
 
     var conversationId = req.body.conversationId;
     var lastMessages = [];
+    var toCreate = false;
+    var title = req.body.title
     if(!conversationId){
+        toCreate = true;
         var charachter = req.body.charachter;
         if(!charachter){
             err = new Error('Malformed request: no charachter selected, no conversationId given.');
@@ -26,13 +38,25 @@ chatRouter.route('/prompt')
             return next(err);
         }
         conversationId = new Date().getTime();
-        lastMessages = [... openAIConstants.initialMessages[charachter]];
+        lastMessages = [... openAIConstants.initialMessages.find(el => el.name===charachter).initialMessages];
     } else {
         lastMessages = myCache.get(conversationId);
     }
 
     lastMessages.push({"role": "user", "content": req.body.question});
     myCache.set(conversationId, lastMessages);
+    
+    if(toCreate){
+    AiConversation.create({ user: req.user._id, title: '', charachter: charachter, conversationId: conversationId, title: title})
+        .then((conversation) => {
+            AiMessage.create({ conversation: conversation._id, content: req.body.question, timestamp: new Date().getTime(), role: 'user'})
+        })
+    } else {
+        AiConversation.findOne({ conversationId: conversationId})
+        .then((conversation) => {
+            AiMessage.create({ conversation: conversation._id, content: req.body.question, timestamp: new Date().getTime(), role: 'user'})
+        })
+    }
 
     var requestMessages = lastMessages;
     let actualHistory = openAIConstants.chatHistoryLenght;
@@ -67,11 +91,15 @@ chatRouter.route('/prompt')
     })    
     .then(gptRes => gptRes.json())    
     .then(gptRes => {
+        console.log("\n\n\n\n\n============================");
+        console.dir(gptRes)
+        console.log("============================");
         var result = {
             "role": gptRes.choices[0].message.role,
             "content": gptRes.choices[0].message.content,
             "conversationId": conversationId,
-            "timestamp": gptRes.created
+            "timestamp": gptRes.created,
+            "title": title
         }
         if(req.user.admin){
             result["tokenCount"] = gptRes.usage.total_tokens;
@@ -79,6 +107,12 @@ chatRouter.route('/prompt')
         var lastMessages = myCache.get(conversationId);
         lastMessages.push({"role": gptRes.choices[0].message.role, "content": gptRes.choices[0].message.content});
         myCache.set(conversationId, lastMessages);
+
+        AiConversation.findOne({ conversationId: conversationId})
+        .then((conversation) => {
+            AiMessage.create({ conversation: conversation._id, content: gptRes.choices[0].message.content, timestamp: gptRes.created, role: 'assistant'})
+        })
+
         res.setHeader('Content-Type', 'application/json');
         res.statusCode = 200;
         res.json(result);
