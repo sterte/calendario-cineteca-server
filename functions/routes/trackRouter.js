@@ -60,8 +60,6 @@ const parseTracksList = (html, originalUrl) => {
                 tracks.push(track);                
             }
         }
-
-        console.log(JSON.stringify(tracks))
         return tracks;
     }catch(error){
         console.log(error)
@@ -105,7 +103,6 @@ trackRouter.route('/')
 .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 .get(cors.cors, (req, res, next) => {
     const url= cinetecaUrl + '/rassegne-di-cineteca';    
-    console.log(url);
     return fetch(url, {headers:{
         contentType: "text/html; charset=iso-8859-1",
       }})    
@@ -140,7 +137,6 @@ trackRouter.route('/:trackId')
 .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 .get(cors.cors, (req, res, next) => {
     const url= cinetecaUrl + '/rassegna/' + req.params.trackId;    
-    console.log(url);
     return fetch(url, {headers:{
         contentType: "text/html; charset=iso-8859-1",
       }})    

@@ -122,7 +122,6 @@ movieRouter.route('/:categoryId/:movieId/:repeatId')
 .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 .get(cors.cors, (req, res, next) => {
     const url= cinetecaUrl + '/' + req.params.categoryId + '/' + req.params.movieId + '/?' + req.params.repeatId;    
-    console.log(url);
     return fetch(url, {headers:{
         contentType: "text/html; charset=iso-8859-1",
       }})    

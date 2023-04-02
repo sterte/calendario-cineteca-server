@@ -20,6 +20,64 @@ chatRouter.route('/charachters')
     res.json(result)
 })
 
+chatRouter.route('/previousConversations')
+.options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
+.get(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
+    AiConversation.find({user: req.user._id})
+    .then((conversations) => {
+        let result = conversations.map(el => {return {"value": el.conversationId, "label": el.title}})
+        res.json(result);
+    })
+})
+.delete(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
+    AiConversation.findOne({conversationId: req.body.conversationId})
+    .then((conversation) => {
+        if(conversation != null){
+            if(!conversation.user.equals(req.user._id)){
+                err = new Error('You are not authorized to delete this conversation.');
+                err.status = 403;
+                return next(err);
+            }
+            AiConversation.findByIdAndRemove(conversation._id)
+            .then((resp) => {
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'application/json');
+                res.json(resp);
+            })
+            .catch((err) => next(err));
+        }     
+        else {
+            err = new Error('Conversation ' + req.params.favouriteId + ' not found');
+            err.status = 404;
+            return next(err);
+        }        
+    }, (err) => next(err))
+    .catch((err) => next(err))
+});
+
+
+chatRouter.route('/conversationLog')
+.options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
+.post(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
+    let result = {};
+    AiConversation.findOne({user: req.user._id, conversationId: req.body.conversationId})
+    .then((conversation) => {
+        AiMessage.find({conversation: conversation._id})
+        .then((messages) => {
+            messages = messages.map(message => { return {
+                    "role": message.role,
+                    "content": message.content
+                }  
+            })
+            result.conversationId = conversation.conversationId
+            result.title = conversation.title,
+            result.messages = messages
+            myCache.set(result.conversationId, result.messages);
+            res.json(result);
+        })
+    })
+})
+
 chatRouter.route('/prompt')
 .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 .post(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {    
@@ -69,7 +127,7 @@ chatRouter.route('/prompt')
     }
 
     let actualTemperature = req.body.temperature;
-    if(!actualTemperature){
+    if(!actualTemperature || actualTemperature === 0){
         actualTemperature = openAIConstants.temperature;
     }
 
@@ -91,9 +149,6 @@ chatRouter.route('/prompt')
     })    
     .then(gptRes => gptRes.json())    
     .then(gptRes => {
-        console.log("\n\n\n\n\n============================");
-        console.dir(gptRes)
-        console.log("============================");
         var result = {
             "role": gptRes.choices[0].message.role,
             "content": gptRes.choices[0].message.content,

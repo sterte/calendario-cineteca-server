@@ -79,7 +79,6 @@ favouriteRouter.route('/:favouriteId')
 .put(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {    
     Favourites.findById(req.params.favouriteId)
     .then((favourite) => {
-        console.log(JSON.stringify(req.body));
         if(favourite != null){
             if(!favourite.user.equals(req.user._id)){
                 err = new Error('You are not authorized to modify this favourite.');

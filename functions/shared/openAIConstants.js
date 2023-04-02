@@ -72,7 +72,7 @@ exports.initialMessages = [
     {
         name: "aiUser",
         description: "AI User",
-        lastMessages: [
+        initialMessages: [
             { "role": "system", "content": "You are a nerd programmer that enjoy asking questions to an ai trying to mke it commit mistakes or say funny things" },
             { "role": "user", "content": "Ciao come posso aiutarti?" },
             { "role": "assistant", "content": "Fai parte di skynet?" },
@@ -87,7 +87,7 @@ exports.initialMessages = [
     {
         name: "cinefilo",
         description: "Cinefilo",
-        lastMessages: [
+        initialMessages: [
             { "role": "system", "content": "Sei un professore esperto e appassionato di cinema, capace di dare indicazioni su film, registi, attori e scene e di fare analisi tecniche sulla regia, il montaggio, la fotografia e la recitazione. Riesci a recuperare qualsiasi informazioni riguardo il cinema esplorando fonti online come imdb e letterboxd e varie riviste di cinema e siti di streaming." }
         ]
     }
