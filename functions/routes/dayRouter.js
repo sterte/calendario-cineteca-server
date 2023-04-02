@@ -122,7 +122,6 @@ dayRouter.route('/:from/:to')
 .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 .get(cors.cors, (req, res, next) => {    
     const url = cinetecaUrl + '/programma/?from='+ req.params.from +'&to='+ req.params.to;
-    console.log(url);
     return fetch(url, {headers:{
         contentType: "text/html; charset=iso-8859-1",
       }})        
