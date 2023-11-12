@@ -11,31 +11,22 @@ const dayRouter = express.Router();
 dayRouter.use(bodyParser.json());
 
 
-const parseDayProgram = (html) => {  
+const parseDayProgram = (html, day) => {  
     try{  
     const parser = new DOMParser();
-    const parsed = parser.parseFromString(html, 'text/html');    
-    const movies = parsed.getElementById('archiveReplace').childNodes;//.getElementsByTagName('article');
-
+    const parsed = parser.parseFromString(html, 'text/html');  
+    const movies = parsed.getElementsByClassName('c-show-repeat-loop');
     
     var i;
     var moviesJson = [];
-    var tmpMovies = [];
-    var currentDay;
-    for(i=0; i<movies.length; i++){                
-        if(movies[i].getAttribute('class') && movies[i].getAttribute('class').indexOf('repeatDayName') > -1){
-            if(tmpMovies.length){
-                moviesJson.push({day: currentDay, movies: tmpMovies});
-                tmpMovies = [];
-            }            
-            currentDay = movies[i].getAttribute('date');                        
-        }
-        else if(movies[i].getAttribute('class') && movies[i].getAttribute('class').indexOf('itemLoop') > -1){
-            const movie = movies[i];          
-            tmpMovies.push(parseUtils.parseMovie(movie, i));                                                          
-        }                               
+    var result = []
+    for(i=0; i<movies.length; i++){
+        const movie = movies[i];
+        moviesJson.push(parseUtils.parseMovie(movie, i));
     }        
-    return moviesJson;
+    result.push({day: day, movies: moviesJson});
+
+    return result;
     }catch(error){
         console.log(error);
     }
@@ -118,10 +109,10 @@ const parseDayProgramOLD = (html) => {
 dayRouter.route('*')
 .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 
-dayRouter.route('/:from/:to')
+dayRouter.route('/:day')
 .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 .get(cors.cors, (req, res, next) => {    
-    const url = cinetecaUrl + '/programma/?from='+ req.params.from +'&to='+ req.params.to;
+    const url = cinetecaUrl + '/film-in-programma/?data='+ req.params.day;
     return fetch(url, {headers:{
         contentType: "text/html; charset=iso-8859-1",
       }})        
@@ -130,7 +121,7 @@ dayRouter.route('/:from/:to')
     .then(html => {
         res.setHeader('Content-Type', 'application/json');
         res.statusCode = 200;
-        var result = parseDayProgram(html);
+        var result = parseDayProgram(html, req.params.day);
         res.json(result);
     })
     .catch((err) => {console.log(err); next(err)});    

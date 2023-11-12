@@ -1,1 +1,1 @@
-exports.cinetecaUrl = 'https://programmazione.cinetecadibologna.it';
+exports.cinetecaUrl = 'https://cinetecadibologna.it/programmazione';
