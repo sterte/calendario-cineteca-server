@@ -91,7 +91,6 @@ favouriteRouter.route('/:favouriteId')
                 Favourites.findById(favourite._id)
                 .populate('user')
                 .then((favourite) => {
-                    console.log('d');
                     res.statusCode = 200;
                     res.setHeader('Content-Type', 'application/json');
                     res.json(favourite);

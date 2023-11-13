@@ -13,29 +13,30 @@ exports.parseMovie = (movie, key = -1) => {
     if(key == -1){
         key = Math.floor(Math.random() * 1000) + 1;
     }
-    var movieData = movie.getElementsByClassName('content');            
+    var movieData = movie.getElementsByClassName('c-repeat-loop__content-container');            
     if(movieData){
 
         movieData = movieData[0].getElementsByTagName('a')[0];        
         const url = movieData.getAttribute('href');
         
         var tmpUrl = url;
-        var from = tmpUrl.indexOf('bologna.it/') + 'bologna.it/'.length;                
+        var from = tmpUrl.indexOf('programmazione/') + 'programmazione/'.length;                
         tmpUrl = tmpUrl.substr(from);
-        
         var aaa = tmpUrl.split('/');
         const categoryId = aaa[0];
         const movieId = aaa[1];
         const repeatId = aaa[2].substr(1);
         
-        const title = movieData.getElementsByTagName('h5')[0].textContent;         
-        const place = movie.getElementsByClassName('place')[0].textContent;
-        var data = movie.getElementsByClassName('date')[0];
-        data = data.getElementsByClassName('dateD')[0].innerHTML + ' ' + data.getElementsByClassName('datej')[0].innerHTML + ' ' + data.getElementsByClassName('dateM')[0].innerHTML + ' ' + data.getElementsByClassName('datey')[0].innerHTML;
-        const time = movie.getElementsByClassName('time')[0].textContent;        
-        var imageAndExtras = movie.getElementsByClassName('coverWrap');
-        var image = imageAndExtras[0].getElementsByClassName('cover')[0].getAttribute('style');
-        image = image.substr(image.indexOf('http')).slice(0, -1);        
+        const title = movieData.getElementsByTagName('h6')[0].textContent; 
+        const place = movie.getElementsByClassName('c-repeat-loop__where')[0].textContent;
+        var data = movie.getElementsByClassName('c-repeat-loop__date')[0].textContent;
+        const time = movie.getElementsByClassName('c-repeat-loop__time')[0].textContent;
+        var image = movie.getElementsByClassName('c-repeat-loop__cover-wrap')[0];
+        image = image.getElementsByTagName('img')[0];
+        image = image.getAttribute('src');
+       
+        let extras = [];
+       /* TODO CHECK
         let extras = imageAndExtras[0].getElementsByClassName('label').length > 0 ? imageAndExtras[0].getElementsByClassName('label')[0].innerHTML : '';
         let specialInfo = movie.getElementsByClassName('specialInfo');
         let specialInfoText = "";
@@ -57,14 +58,10 @@ exports.parseMovie = (movie, key = -1) => {
             }            
         }
         extras = '<p>' + extras + '</p>';
+       */
         
-        var isVO = false;
-        var isMUSIC = false;
-        const icons = movie.getElementsByClassName('iconSet');
-        if(icons.length){
-            isVO = icons[0].getElementsByClassName('originalVersion').length ? true : false;
-            isMUSIC = false; //TODO
-        }
+        var isVO = movie.getElementsByClassName('fa-volume-off').length;
+        var isMUSIC = false; //TODO
         
         return {           
             key: key,

@@ -18,47 +18,41 @@ const parseTracksList = (html, originalUrl) => {
         const parsed = parser.parseFromString(html, 'text/html');    
 
 
-        const articles = parsed.getElementsByTagName('article');           
+        let mainTrack = parsed.getElementsByClassName('c-editorial-slider-item')[0]
+        let track = {}
+        track.title = mainTrack.getElementsByClassName('c-editorial-slider-item__title')[0].innerHTML;
+        track.dateInfo = '';
+        track.description =  mainTrack.getElementsByClassName('c-editorial-slider-item__description')[0].innerHTML;
+        track.link = mainTrack.getElementsByTagName('a')[0].getAttribute('href');
+        track.image = mainTrack.getElementsByTagName('img')[0].getAttribute('src');
+        let id = track.link;
+        id = id.slice(0, -1)
+        let from = id.lastIndexOf('/') + 1;
+        id = id.substring(from);
+        track.id = id;
+        tracks.push(track);
+
+        const articles = parsed.getElementsByClassName('c-posts-stream')[0].getElementsByTagName('article');           
         for(let i=0;i<articles.length;i++){
-            let track = {};
-            let article = articles[i];                        
-            if(article.getAttribute('class').includes('itemLoop')){
-                var title = article.getElementsByClassName('title')[0].innerHTML;
-                track.title = title;
-                var dateInfo = article.getElementsByClassName('dateInfo').length > 0 ? article.getElementsByClassName('dateInfo')[0].innerHTML : "";
-                track.dateInfo = dateInfo;
-                var description = article.getElementsByClassName('description')[0].innerHTML;
-                track.description = description;
-                var linkNode = article.getElementsByTagName('a')[0];
-                var link = linkNode.getAttribute('href');                
-                track.link = link;
-
-                var image = linkNode.getAttribute('style');
-                if(image == null){
-                    image = article.getElementsByClassName('contentWrap')[0].getAttribute('test');
-                    track.image = image;
-
-                    var id = article.getElementsByTagName('a')[0].getAttribute('href');
-                    to = id.lastIndexOf('/') -1;
-                    from = id.lastIndexOf('/', to) + 1;                    
-                    id = id.substr(from, to-from+1);       
-                    track.id = id;
-
-                }else{                    
-                    var from = image.indexOf('url(')+4;
-                    var to = image.indexOf(')', from);        
-                    image = image.substr(from, to-from);       
-                    track.image = image;
-
-                    var id = linkNode.getAttribute('href');
-                    to = id.lastIndexOf('/') -1;
-                    from = id.lastIndexOf('/', to) + 1;
-                    id = id.substr(from, to-from+1);       
-                    track.id = id;
-                }
-
-                tracks.push(track);                
-            }
+            track = {};
+            let article = articles[i];     
+            var title = article.getElementsByClassName('c-loop-exhibition__title')[0].innerHTML;
+            track.title = title;
+            var dateInfo = article.getElementsByClassName('c-loop-exhibition__label').length > 0 ? article.getElementsByClassName('c-loop-exhibition__label')[0].innerHTML : "";
+            track.dateInfo = dateInfo;
+            var description = article.getElementsByClassName('c-loop-exhibition__subtitle').length > 0 ? article.getElementsByClassName('c-loop-exhibition__subtitle')[0].innerHTML : '';
+            track.description = description;
+            var linkNode = article.getElementsByTagName('a')[0];
+            var link = linkNode.getAttribute('href');                
+            track.link = link;
+            id = track.link;
+            id = id.slice(0, -1)
+            from = id.lastIndexOf('/') + 1;
+            id = id.substring(from);
+            track.id = id;
+            var image = article.getElementsByTagName('img')[0].getAttribute('src');
+            track.image = image;
+            tracks.push(track);                
         }
         return tracks;
     }catch(error){
@@ -73,17 +67,14 @@ const parseTrackDetail = (html, originalUrl) => {
     const parser = new DOMParser();
     const parsed = parser.parseFromString(html, 'text/html');    
 
-
-    const sections = parsed.getElementsByTagName('section');
-    const titleSection = sections[0];
-    const listSection = sections[1];
-    const title = titleSection.getElementsByClassName('title')[0].innerHTML;
+    const title = parsed.getElementsByClassName('c-exhibition-cover__title')[0].innerHTML;
     track.title = title;
-    const description = titleSection.getElementsByTagName('p')[0].innerHTML;
+
+    const description = parsed.getElementsByClassName('wp-block-qtheme-text-editor-content-inner')[0].innerHTML;
     track.description = description;
 
     tmpMovies = [];
-    const movies = listSection.getElementsByTagName('article');
+    const movies = parsed.getElementsByClassName('c-archive__items')[0].getElementsByTagName('article');
     for(let i=0;i<movies.length;i++){
         let movie = movies[i];
         tmpMovies.push(parseUtils.parseMovie(movie, i));        
@@ -102,7 +93,7 @@ trackRouter.route('*')
 trackRouter.route('/')
 .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 .get(cors.cors, (req, res, next) => {
-    const url= cinetecaUrl + '/rassegne-di-cineteca';    
+    const url= cinetecaUrl + '/rassegne-di-cineteca';  
     return fetch(url, {headers:{
         contentType: "text/html; charset=iso-8859-1",
       }})    

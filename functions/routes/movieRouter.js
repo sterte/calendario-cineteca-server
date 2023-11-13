@@ -10,6 +10,8 @@ const { cinetecaUrl } = require('../shared/baseUrl');
 const movieRouter = express.Router();
 movieRouter.use(bodyParser.json());
 
+const monthNamesShort = ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'];
+
 
 const parseMovieDetail = (html, originalUrl) => {    
     try{
@@ -17,32 +19,28 @@ const parseMovieDetail = (html, originalUrl) => {
         const parser = new DOMParser();
         const parsed = parser.parseFromString(html, 'text/html');    
 
-        const title = parsed.getElementsByClassName('postTitle').length > 0 ? parsed.getElementsByClassName('postTitle')[0].innerHTML : '';                
-        var durata = parsed.getElementsByClassName('infoTitle').length > 0 ? parsed.getElementsByClassName('infoTitle')[0].innerHTML : '';  
-        durata = durata.replace(/<[^>]*>?/gm, '');      
-        var image = parsed.getElementsByClassName('mainSection')[0].getElementsByClassName('backgroundCover').length > 0 ? parsed.getElementsByClassName('mainSection')[0].getElementsByClassName('backgroundCover')[0].getAttribute('style') : '';             
-
-        const from = image.indexOf('url(')+4;
-        const to = image.indexOf(')', from);        
-        image = image.substr(from, to-from);                
+        const title = parsed.getElementsByClassName('c-show-single-page-title__title').length > 0 ? parsed.getElementsByClassName('c-show-single-page-title__title')[0].innerHTML : '';                
+        //TODO durata attualmente non presente in pagina
+        var durata = parsed.getElementsByClassName('c-show-single-page-title__title-info')[0].innerHTML;
+        var image = parsed.getElementsByClassName('c-show-single-gallery')[0].getElementsByTagName('img');
+        image = image.length > 0 ? image[0].getAttribute('src') : '';             
         
-        var buyLink = parsed.getElementsByClassName('ticketButton').length > 0 ? parsed.getElementsByClassName('ticketButton') : '';
-        buyLink = buyLink.length > 0 ?  buyLink[0].getElementsByTagName('a')[0].getAttribute('href') : '';
+        var buyLink = parsed.getElementsByClassName('c-button-entry-condition--buy').length > 0 ? parsed.getElementsByClassName('c-button-entry-condition--buy') : '';
+        buyLink = buyLink.length > 0 ?  buyLink[0].getAttribute('href') : '';
         
         var sinossi;
-        if(parsed.getElementsByClassName('movieDescription').length > 0){
-            sinossi = parsed.getElementsByClassName('movieDescription')[0].innerHTML;
-        }
-        else if(parsed.getElementsByClassName('repeatDescription').length > 0){
-            sinossi = parsed.getElementsByClassName('repeatDescription')[0].innerHTML;
+        if(parsed.getElementsByClassName('c-loop-show-movie__description').length > 0){
+            sinossi = parsed.getElementsByClassName('c-loop-show-movie__description')[0].innerHTML;
         }
         else{
             sinossi = '';
         }
 
-        const isVO = parsed.getElementsByClassName('languageSideItem').length > 0 ? parsed.getElementsByClassName('languageSideItem')[0].getElementsByClassName('originalVersion').length : false;        
-        
-        //const costi = parsed.getElementsByClassName('costi')[0].innerHTML.replace(/<a .*<\/a>/g, '').replace('h2', 'h5');    
+        const isVO = parsed.getElementsByClassName('c-show-single-repeat-sidebar__item-title')[0].innerHTML.includes('Originale');        
+  
+        //EXTRAS TODO
+        let extrasString = '';
+/*
         let extras = parsed.getElementsByClassName('specialEventWrap');
         let extrasString = '';
         if(extras.length > 0){
@@ -54,51 +52,54 @@ const parseMovieDetail = (html, originalUrl) => {
                 extrasString = extrasString + '<br>' + extra.innerHTML;
             }            
         }
-
-        var pagRepliche = parsed.getElementsByClassName('sameRepeatsStreamWrap');            
+*/
+        var pagRepliche = parsed.getElementsByClassName('c-show-single-next-repeats');            
         var days = [];
         var hours = [];
         var place = "";
         var oldData;
         var currentHour;
 
-        if(parsed.getElementsByClassName('overTitle').length > 0){
-            replica = parsed.getElementsByClassName('overTitle')[0];
-            const weekDay =  parsed.getElementsByClassName('datel')[0].innerHTML.substr(0,3) + ' ';
-            const hours = {isVO: isVO, additionalInfo:extrasString, orario: replica.getElementsByClassName('hours')[0].innerHTML};
-            data = replica.getElementsByClassName('date')[0];
-            data = weekDay + ' ' + data.getElementsByClassName('dated')[0].innerHTML + ' ' + data.getElementsByClassName('dateM')[0].innerHTML + ' ' + data.getElementsByClassName('dateY')[0].innerHTML.substr(2);                    
-            if(replica.getElementsByClassName('place').length > 0){
-                place = replica.getElementsByClassName('place')[0].getElementsByTagName('a')[0].innerHTML;
+        if(parsed.getElementsByClassName('c-show-single-repeat-where-and-when__content').length > 0){
+            replica = parsed.getElementsByClassName('c-show-single-repeat-where-and-when__content')[0];
+            
+            let dataSplitted = parsed.getElementsByClassName('c-show-single-repeat-where-and-when__day')[0].innerHTML.split(' ');
+            let dataSplitted2 = dataSplitted[1].split('/');
+            const data = dataSplitted[0] + ' ' + dataSplitted2[0] + ' '  + monthNamesShort[dataSplitted2[1]-1] + ' ' + dataSplitted2[2].substring(2)
+            const hours = {isVO: isVO, additionalInfo:extrasString, orario: replica.getElementsByClassName('c-show-single-repeat-where-and-when__time')[0].innerHTML};
+            
+            if(replica.getElementsByClassName('c-show-single-repeat-where-and-when__where').length > 0){
+                place = replica.getElementsByClassName('c-show-single-repeat-where-and-when__where')[0].innerHTML;
             }
             currentHour = {place : place, day: data, hours: [hours]};
         } 
 
         if(pagRepliche.length>0){
-            pagRepliche = pagRepliche[0].getElementsByClassName('itemLoop');
+            pagRepliche = pagRepliche[0].getElementsByTagName('article');
             if(pagRepliche.length>0){
                 var i;                
                 for(i=0; i<pagRepliche.length; i++){         
-                    var data = pagRepliche[i].getElementsByClassName('date')[0];
-                    data = data.getElementsByClassName('dateD')[0].innerHTML + ' ' + data.getElementsByClassName('datej')[0].innerHTML + ' ' + data.getElementsByClassName('dateM')[0].innerHTML + ' ' + data.getElementsByClassName('datey')[0].innerHTML;
+                    var data = pagRepliche[i].getElementsByClassName('c-repeat-loop__date')[0].innerHTML;                    
                     if(data != oldData && oldData != null){
                         days.push({place: oldLuogo, day: oldData, hours: hours});
                         hours = [];
                         place = "";
                     }
-                    const orario = pagRepliche[i].getElementsByClassName('time')[0].innerHTML;
-                    const luogo = pagRepliche[i].getElementsByClassName('place')[0].innerHTML;
-                    const isVO = pagRepliche[i].getElementsByClassName('originalVersion').length > 0;    
+                    const orario = pagRepliche[i].getElementsByClassName('c-repeat-loop__time')[0].innerHTML;
+                    const luogo = pagRepliche[i].getElementsByClassName('c-repeat-loop__where')[0].innerHTML;
+                    const isVO = pagRepliche[i].getElementsByClassName('fa-volume-off').length > 0;    
                     var additionalInfo = "";
+                    //ADDITIONAL INFO TODO
+                    /*
                     var additionalInfoNode = pagRepliche[i].getElementsByClassName('infoWrap');
                     if(additionalInfoNode.length > 0){
                         additionalInfoNode = additionalInfoNode[0].getElementsByTagName('p');
                         if(additionalInfoNode.length > 0){
                             additionalInfo = additionalInfoNode[0].innerHTML;
                         }
-                    }                    
+                    } 
+                    */                   
                     hours.push({orario: orario, isVO: isVO, additionalInfo: additionalInfo});    
-                    //hours.push(orario);    
                     if(i == pagRepliche.length-1){
                         days.push({place: luogo, day: data, hours: hours});
                     }
@@ -121,7 +122,7 @@ const parseMovieDetail = (html, originalUrl) => {
 movieRouter.route('/:categoryId/:movieId/:repeatId')
 .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 .get(cors.cors, (req, res, next) => {
-    const url= cinetecaUrl + '/' + req.params.categoryId + '/' + req.params.movieId + '/?' + req.params.repeatId;    
+    const url= cinetecaUrl + '/' + req.params.categoryId + '/' + req.params.movieId + '/?' + req.params.repeatId;  
     return fetch(url, {headers:{
         contentType: "text/html; charset=iso-8859-1",
       }})    
