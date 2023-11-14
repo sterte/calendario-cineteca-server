@@ -38,21 +38,19 @@ const parseMovieDetail = (html, originalUrl) => {
 
         const isVO = parsed.getElementsByClassName('c-show-single-repeat-sidebar__item-title')[0].innerHTML.includes('Originale');        
   
-        //EXTRAS TODO
-        let extrasString = '';
-/*
-        let extras = parsed.getElementsByClassName('specialEventWrap');
+
+        let extras = parsed.getElementsByClassName('c-show-single-repeat-content__bar-info-item');
         let extrasString = '';
         if(extras.length > 0){
-            extras = parsed.getElementsByClassName('specialEventWrap')[0];            
-            extrasString = extras.getElementsByClassName('mainLabel').length > 0 ? extras.getElementsByClassName('mainLabel')[0].innerHTML : '';
-            extras = extras.getElementsByClassName('repeatInfo');                  
             for(let i=0;i<extras.length;i++){                          
                 let extra = extras[i];
-                extrasString = extrasString + '<br>' + extra.innerHTML;
+                if(i > 0){
+                    extrasString = extrasString + '<br>'
+                }
+                extrasString = extrasString + extra.innerHTML;
             }            
         }
-*/
+
         var pagRepliche = parsed.getElementsByClassName('c-show-single-next-repeats');            
         var days = [];
         var hours = [];
@@ -89,16 +87,12 @@ const parseMovieDetail = (html, originalUrl) => {
                     const luogo = pagRepliche[i].getElementsByClassName('c-repeat-loop__where')[0].innerHTML;
                     const isVO = pagRepliche[i].getElementsByClassName('fa-volume-off').length > 0;    
                     var additionalInfo = "";
-                    //ADDITIONAL INFO TODO
-                    /*
-                    var additionalInfoNode = pagRepliche[i].getElementsByClassName('infoWrap');
+                    var additionalInfoNode = pagRepliche[i].getElementsByClassName('c-repeat-loop__label');
                     if(additionalInfoNode.length > 0){
-                        additionalInfoNode = additionalInfoNode[0].getElementsByTagName('p');
                         if(additionalInfoNode.length > 0){
                             additionalInfo = additionalInfoNode[0].innerHTML;
                         }
                     } 
-                    */                   
                     hours.push({orario: orario, isVO: isVO, additionalInfo: additionalInfo});    
                     if(i == pagRepliche.length-1){
                         days.push({place: luogo, day: data, hours: hours});
