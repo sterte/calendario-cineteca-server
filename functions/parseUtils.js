@@ -35,11 +35,8 @@ exports.parseMovie = (movie, key = -1) => {
         image = image.getElementsByTagName('img')[0];
         image = image.getAttribute('src');
        
-        let extras = [];
-       /* TODO CHECK
-        let extras = imageAndExtras[0].getElementsByClassName('label').length > 0 ? imageAndExtras[0].getElementsByClassName('label')[0].innerHTML : '';
-        let specialInfo = movie.getElementsByClassName('specialInfo');
-        let specialInfoText = "";
+        let extras = movie.getElementsByClassName('c-repeat-loop__label').length > 0 ? movie.getElementsByClassName('c-repeat-loop__label')[0].innerHTML : '';
+        let specialInfo = movie.getElementsByClassName('specialInfo'); //TODO
         if(specialInfo.length){
             specialInfo = specialInfo[0]     
             specialInfo = specialInfo.getElementsByClassName('infoItem');                  
@@ -58,7 +55,7 @@ exports.parseMovie = (movie, key = -1) => {
             }            
         }
         extras = '<p>' + extras + '</p>';
-       */
+       
         
         var isVO = movie.getElementsByClassName('fa-volume-off').length;
         var isMUSIC = false; //TODO
