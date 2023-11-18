@@ -3,6 +3,7 @@ exports.forceCharachtersEncoding = (text) => {
     text = text.replace(/&#8211;/g, '-');   
     text = text.replace(/&#8230;/g, '...');   
     text = text.replace(/&#8216;/g, "'");      
+    text = text.replace(/&#8242;/g, "'");      
     text = text.replace(/&amp;/g, "&");     
     return text;
 };
@@ -27,14 +28,20 @@ exports.parseMovie = (movie, key = -1) => {
         const movieId = aaa[1];
         const repeatId = aaa[2].substr(1);
         
-        const title = movieData.getElementsByTagName('h6')[0].textContent; 
+        const title = movieData.getElementsByTagName('h6')[0].textContent.replace('\n', '').trim(); 
         const place = movie.getElementsByClassName('c-repeat-loop__where')[0].textContent;
         var data = movie.getElementsByClassName('c-repeat-loop__date')[0].textContent;
         const time = movie.getElementsByClassName('c-repeat-loop__time')[0].textContent;
         var image = movie.getElementsByClassName('c-repeat-loop__cover-wrap')[0];
         image = image.getElementsByTagName('img')[0];
         image = image.getAttribute('src');
-       
+        var durata = movie.getElementsByClassName('c-repeat-loop__title-info')[0].textContent;
+        if(durata.includes('(')){
+        durata = this.forceCharachtersEncoding(durata.split('(')[1].split(')')[0]);
+        } else {
+            durata = ''
+        }
+
         let extras = movie.getElementsByClassName('c-repeat-loop__label').length > 0 ? movie.getElementsByClassName('c-repeat-loop__label')[0].innerHTML : '';
         let specialInfo = movie.getElementsByClassName('specialInfo'); //TODO
         if(specialInfo.length){
@@ -73,7 +80,8 @@ exports.parseMovie = (movie, key = -1) => {
             image: image,
             isVO: isVO,
             isMUSIC: isMUSIC,
-            extras: extras
+            extras: extras,
+            durata: durata
         }
     }
 };  
