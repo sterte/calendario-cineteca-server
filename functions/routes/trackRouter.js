@@ -70,7 +70,13 @@ const parseTrackDetail = (html, originalUrl) => {
     const title = parsed.getElementsByClassName('c-exhibition-cover__title')[0].innerHTML;
     track.title = title;
 
-    const description = parsed.getElementsByClassName('wp-block-qtheme-text-editor-content-inner')[0].innerHTML;
+    var description = "";
+    if(parsed.getElementsByClassName('wp-block-qtheme-text-editor-content-inner').length > 0){
+        description = parsed.getElementsByClassName('wp-block-qtheme-text-editor-content-inner')[0].innerHTML;
+    } else if(parsed.getElementsByClassName('c-single-paragraph__description').length > 0){
+        description = parsed.getElementsByClassName('c-single-paragraph__description')[0].innerHTML;
+    }
+
     track.description = description;
 
     tmpMovies = [];
