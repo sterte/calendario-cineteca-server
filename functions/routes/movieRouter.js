@@ -32,6 +32,10 @@ const parseMovieDetail = (html, originalUrl) => {
         if(parsed.getElementsByClassName('c-loop-show-movie__description').length > 0){
             sinossi = parsed.getElementsByClassName('c-loop-show-movie__description')[0].innerHTML;
         }
+        else if(parsed.getElementsByClassName('c-show-single-description__content').length > 0){
+            sinossi = parsed.getElementsByClassName('c-show-single-description__content')[0].innerHTML;
+        }
+        
         else{
             sinossi = '';
         }
