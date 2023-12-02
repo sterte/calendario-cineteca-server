@@ -73,20 +73,22 @@ const parseTrackDetail = (html, originalUrl) => {
     var description = "";
     if(parsed.getElementsByClassName('wp-block-qtheme-text-editor-content-inner').length > 0){
         description = parsed.getElementsByClassName('wp-block-qtheme-text-editor-content-inner')[0].innerHTML;
-    } else if(parsed.getElementsByClassName('c-single-paragraph__description').length > 0){
-        description = parsed.getElementsByClassName('c-single-paragraph__description')[0].innerHTML;
+    } else if(parsed.getElementsByClassName('c-exhibition-cover__subtitle').length > 0){
+        description = parsed.getElementsByClassName('c-exhibition-cover__subtitle')[0].innerHTML;
     }
 
     track.description = description;
 
     tmpMovies = [];
-    const movies = parsed.getElementsByClassName('c-archive__items')[0].getElementsByTagName('article');
-    for(let i=0;i<movies.length;i++){
-        let movie = movies[i];
-        tmpMovies.push(parseUtils.parseMovie(movie, i));        
-    }
+    if(parsed.getElementsByClassName('c-archive__items').length > 0){
+        const movies = parsed.getElementsByClassName('c-archive__items')[0].getElementsByTagName('article');
+        for(let i=0;i<movies.length;i++){
+            let movie = movies[i];
+            tmpMovies.push(parseUtils.parseMovie(movie, i));        
+        }
 
-    track.movies = tmpMovies;
+        track.movies = tmpMovies;
+    }
     return track;
 
 
