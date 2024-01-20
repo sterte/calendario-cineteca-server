@@ -43,18 +43,18 @@ exports.parseMovie = (movie, key = -1) => {
         }
 
         let extras = movie.getElementsByClassName('c-repeat-loop__label').length > 0 ? movie.getElementsByClassName('c-repeat-loop__label')[0].innerHTML : '';
-        let specialInfo = movie.getElementsByClassName('specialInfo'); //TODO
+        let specialInfo = movie.getElementsByClassName('c-repeat-loop__infos');
         if(specialInfo.length){
-            specialInfo = specialInfo[0]     
-            specialInfo = specialInfo.getElementsByClassName('infoItem');                  
             for(let i=0; i<specialInfo.length;i++){
-                let infoItem = specialInfo[i]                
-                infoItem = infoItem.getElementsByClassName('infoText');
-                if(infoItem.length){
-                    infoItem = infoItem[0].getElementsByTagName('p');
-                    if(infoItem.length){
-                        for(let j=0;j<infoItem.length;j++){
-                            let item = infoItem[j];
+                let infoItem = specialInfo[i];
+                let exhibitions = infoItem.getElementsByClassName('exhibition');
+                let specialEvents = infoItem.getElementsByClassName('special-event');
+                exhibitions = [...exhibitions, ...specialEvents];
+                for(let item of exhibitions){
+                    item = item.getElementsByClassName('c-repeat-loop__info-item-text');
+                    if(item.length){
+                        for(let j=0;j<item.length;j++){
+                            item = item[j];
                             extras = extras + '<br>' + item.innerHTML;
                         }                            
                     }                        
@@ -62,8 +62,7 @@ exports.parseMovie = (movie, key = -1) => {
             }            
         }
         extras = '<p>' + extras + '</p>';
-       
-        
+
         var isVO = movie.getElementsByClassName('fa-volume-off').length;
         var isMUSIC = false; //TODO
         
