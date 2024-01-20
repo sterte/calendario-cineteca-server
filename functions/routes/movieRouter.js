@@ -20,7 +20,6 @@ const parseMovieDetail = (html, originalUrl) => {
         const parsed = parser.parseFromString(html, 'text/html');    
 
         const title = parsed.getElementsByClassName('c-show-single-page-title__title').length > 0 ? parsed.getElementsByClassName('c-show-single-page-title__title')[0].innerHTML : '';                
-        //TODO durata attualmente non presente in pagina
         var durata = parsed.getElementsByClassName('c-show-single-page-title__title-info')[0].innerHTML;
         var image = parsed.getElementsByClassName('c-show-single-gallery')[0].getElementsByTagName('img');
         image = image.length > 0 ? image[0].getAttribute('src') : '';             
@@ -43,7 +42,7 @@ const parseMovieDetail = (html, originalUrl) => {
         const isVO = parsed.getElementsByClassName('c-show-single-repeat-sidebar__item-title')[0].innerHTML.includes('Originale');        
   
 
-        let extras = parsed.getElementsByClassName('c-show-single-repeat-content__bar-info-item');
+        let extras = parsed.getElementsByClassName('c-show-single-repeat-content__bar-info-item--special-event-info');
         let extrasString = '';
         if(extras.length > 0){
             for(let i=0;i<extras.length;i++){                          
@@ -54,6 +53,13 @@ const parseMovieDetail = (html, originalUrl) => {
                 extrasString = extrasString + extra.innerHTML;
             }            
         }
+
+        extras = parsed.getElementsByClassName('c-show-single-repeat-part-of__item-content');
+        if(extras.length > 0){
+            extrasString = extrasString + 'Rassegna: ' + extras[0].innerHTML.replace('https://cinetecadibologna.it/programmazione/rassegna', '/tracks');
+        }
+        extrasString = extrasString + '<br>';
+        
 
         var pagRepliche = parsed.getElementsByClassName('c-show-single-next-repeats');            
         var days = [];
