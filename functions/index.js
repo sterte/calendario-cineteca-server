@@ -1,4 +1,4 @@
-const functions = require('firebase-functions');
+const { onRequest } = require('firebase-functions/v2/https');
 var createError = require('http-errors');
 var express = require('express');
 var cookieParser = require('cookie-parser');
@@ -20,7 +20,6 @@ var trackRouter = require('./routes/trackRouter');
 var chatRouter = require('./routes/chatRouter');
 
 const mongoose = require('mongoose');
-const { signedCookies } = require('cookie-parser');
 
 const url = config.mongoUrl;
 const connect = mongoose.connect(url);
@@ -41,7 +40,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(passport.initialize());
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
@@ -62,6 +60,4 @@ app.use(function(err, req, res, next) {
   res.json({ message: err.message, status: err.status });
 });
 
-const PORT=3000;
-app.listen(PORT);
-exports.app = functions.https.onRequest(app);
+exports.app = onRequest(app);
