@@ -62,9 +62,9 @@ router.post('/login', cors.corsWithOptions, (req, res, next) => { //arrow functi
     if(!user){
       res.statusCode = 401;
       res.setHeader('Content-Type', 'application/json');
-      res.json({success: false, status: 'Login unsuccesful!', err: info});
-    }    
-    req.logIn(user, (err) => {            
+      return res.json({success: false, status: 'Login unsuccesful!', err: info});
+    }
+    req.logIn(user, { session: false }, (err) => {
       if(err){        
         res.statusCode = 401;
         res.setHeader('Content-Type', 'application/json');
