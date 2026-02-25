@@ -1,7 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('./cors');
-const fetch = require('node-fetch');
 const parseUtils = require('../parseUtils')
 const DOMParser = require('dom-parser');
 const { cinetecaUrl } = require('../shared/baseUrl');

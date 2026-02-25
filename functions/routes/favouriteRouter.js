@@ -38,7 +38,7 @@ favouriteRouter.route('/')
     res.end('PUT operation not supported on /favourites');
 })
 .delete(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
-    Favourites.remove({})
+    Favourites.deleteMany({})
     .then((resp) => {        
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
@@ -114,7 +114,7 @@ favouriteRouter.route('/:favouriteId')
                 err.status = 403;
                 return next(err);
             }
-            Favourites.findByIdAndRemove(req.params.favouriteId)
+            Favourites.findByIdAndDelete(req.params.favouriteId)
             .then((resp) => {
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'application/json');

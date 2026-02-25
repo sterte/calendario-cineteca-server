@@ -37,19 +37,19 @@ router.post('/signup', cors.corsWithOptions, function(req, res, next){ //explici
       if(req.body.lastname){
         user.lastname = req.body.lastname;
       }
-      user.save((err, user) => {
-        if(err){
+      user.save()
+        .then((savedUser) => {
+          passport.authenticate('local')(req, res, () => { //no error handling needed, authenticate() directly send back error response if authentication fails
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'application/json');
+            res.json({success: true, status: 'Registration succesful', user: savedUser});
+          });
+        })
+        .catch((err) => {
           res.statusCode = 500;
           res.setHeader('Content-Type', 'application/json');
           res.json({err: err});
-          return;
-        }
-        passport.authenticate('local')(req, res, () => { //no error handling needed, authenticate() directly send backj erroresponse if authentication fails
-          res.statusCode = 200;
-          res.setHeader('Content-Type', 'application/json');
-          res.json({success: true, status: 'Registration succesful', user: user});
-        });      
-      });      
+        });
     }
   }, (err) => console.log(err));  
 });

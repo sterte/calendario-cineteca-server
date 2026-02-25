@@ -2,7 +2,6 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('./cors');
 const authenticate = require('../authenticate');
-const fetch = require('node-fetch');
 const openAIConstants = require('../shared/openAIConstants');
 const NodeCache = require('node-cache');
 const AiConversation = require('../models/aiConversation');
@@ -38,7 +37,7 @@ chatRouter.route('/previousConversations')
                 err.status = 403;
                 return next(err);
             }
-            AiConversation.findByIdAndRemove(conversation._id)
+            AiConversation.findByIdAndDelete(conversation._id)
             .then((resp) => {
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'application/json');
