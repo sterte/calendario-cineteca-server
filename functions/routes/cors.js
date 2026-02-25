@@ -4,7 +4,10 @@ const app = express();
 
 const whitelist = [
     'https://cinetecalendar.web.app',
-    'http://www.cinetecadibologna.it'];
+    'https://cinetecalendar.firebaseapp.com',
+    'http://www.cinetecadibologna.it',
+    'http://localhost:3000',
+    'http://localhost:3001'];
 
 
 var corsOptionDelegate = (req, cb) => {
