@@ -56,7 +56,7 @@ const parseTracksList = (html, originalUrl) => {
         return tracks;
     }catch(error){
         console.log(error)
-        return error;
+        return [];
     }
 }
 
@@ -107,13 +107,7 @@ trackRouter.route('/')
     .then(res => res.text())
     .then((res) => parseUtils.forceCharachtersEncoding(res))
     .then(html => {
-        const details = parseTracksList(html, url);
-        if(details.errMess){
-            res.statusCode = 500;
-            res.statusMessage = error;
-        }else{
-            res.json(details);
-        }        
+        res.json(parseTracksList(html, url));
     })    
     .catch((err) => {console.log(err); next(err)});
 }, (err) => {console.log(err); next(err)})
