@@ -10,52 +10,28 @@ const trackRouter = express.Router();
 trackRouter.use(bodyParser.json());
 
 
-const parseTracksList = (html, originalUrl) => {    
-    try{
-        var tracks = [];    
+const parseTracksList = (html, originalUrl) => {
+    try {
+        const tracks = [];
         const parser = new DOMParser();
-        const parsed = parser.parseFromString(html, 'text/html');    
+        const parsed = parser.parseFromString(html, 'text/html');
 
-
-        let mainTrack = parsed.getElementsByClassName('c-editorial-slider-item')[0]
-        let track = {}
-        track.title = mainTrack.getElementsByClassName('c-editorial-slider-item__title')[0].innerHTML;
-        track.dateInfo = '';
-        track.description =  mainTrack.getElementsByClassName('c-editorial-slider-item__description')[0].innerHTML;
-        track.link = mainTrack.getElementsByTagName('a')[0].getAttribute('href');
-        track.image = mainTrack.getElementsByTagName('img')[0].getAttribute('src');
-        let id = track.link;
-        id = id.slice(0, -1)
-        let from = id.lastIndexOf('/') + 1;
-        id = id.substring(from);
-        track.id = id;
-        tracks.push(track);
-
-        const articles = parsed.getElementsByClassName('c-posts-stream')[0].getElementsByTagName('article');           
-        for(let i=0;i<articles.length;i++){
-            track = {};
-            let article = articles[i];     
-            var title = article.getElementsByClassName('c-loop-exhibition__title')[0].innerHTML;
-            track.title = title;
-            var dateInfo = article.getElementsByClassName('c-loop-exhibition__label').length > 0 ? article.getElementsByClassName('c-loop-exhibition__label')[0].innerHTML : "";
-            track.dateInfo = dateInfo;
-            var description = article.getElementsByClassName('c-loop-exhibition__subtitle').length > 0 ? article.getElementsByClassName('c-loop-exhibition__subtitle')[0].innerHTML : '';
-            track.description = description;
-            var linkNode = article.getElementsByTagName('a')[0];
-            var link = linkNode.getAttribute('href');                
-            track.link = link;
-            id = track.link;
-            id = id.slice(0, -1)
-            from = id.lastIndexOf('/') + 1;
-            id = id.substring(from);
-            track.id = id;
-            var image = article.getElementsByTagName('img')[0].getAttribute('src');
-            track.image = image;
-            tracks.push(track);                
+        const articles = parsed.getElementsByClassName('c-posts-stream')[0].getElementsByTagName('article');
+        for (let i = 0; i < articles.length; i++) {
+            const article = articles[i];
+            const track = {};
+            track.title = article.getElementsByClassName('c-loop-exhibition__title')[0].innerHTML;
+            track.dateInfo = article.getElementsByClassName('c-loop-exhibition__label').length > 0 ? article.getElementsByClassName('c-loop-exhibition__label')[0].innerHTML : '';
+            track.description = article.getElementsByClassName('c-loop-exhibition__subtitle').length > 0 ? article.getElementsByClassName('c-loop-exhibition__subtitle')[0].innerHTML : '';
+            track.link = article.getElementsByTagName('a')[0].getAttribute('href');
+            let id = track.link.slice(0, -1);
+            track.id = id.substring(id.lastIndexOf('/') + 1);
+            track.image = article.getElementsByTagName('img')[0].getAttribute('src');
+            tracks.push(track);
         }
         return tracks;
-    }catch(error){
-        console.log(error)
+    } catch (error) {
+        console.log(error);
         return [];
     }
 }
