@@ -19,7 +19,7 @@ const italianWeekDays = {
 const popupMovieRouter = express.Router();
 popupMovieRouter.use(bodyParser.json());
 
-// "Sabato 28/02/2026" → "Sab 28 Feb"
+// "Sabato 28/02/2026" → "Sab 28 Feb 26"
 const formatItalianDate = (italianDate) => {
     const parts = italianDate.trim().split(/\s+/);
     if (parts.length < 2) return italianDate;
@@ -28,7 +28,8 @@ const formatItalianDate = (italianDate) => {
     if (dateParts.length < 3) return italianDate;
     const dayNum = parseInt(dateParts[0], 10);
     const monthIdx = parseInt(dateParts[1], 10) - 1;
-    return `${dayName} ${dayNum} ${monthNamesShort[monthIdx]}`;
+    const yearShort = dateParts[2].slice(2);
+    return `${dayName} ${dayNum} ${monthNamesShort[monthIdx]} ${yearShort}`;
 };
 
 // Unescape a JS string literal
@@ -40,12 +41,15 @@ const unescapeJsStr = (s) => s
     .replace(/\\t/g, '\t')
     .replace(/\\"/g, '"');
 
-// Extract HTML from $(selector).html('...') in a JS response
+// Extract HTML from $(selector).html('...') or .html("...") in a JS response
 const extractJqueryHtml = (js, selector) => {
     const esc = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const re = new RegExp(`\\$\\(["']\\s*${esc}\\s*["']\\)\\.html\\('((?:[^'\\\\]|\\\\.)*)'\\)`);
-    const m = js.match(re);
-    return m ? unescapeJsStr(m[1]) : '';
+    const reSingle = new RegExp(`\\$\\(["']\\s*${esc}\\s*["']\\)\\.html\\('((?:[^'\\\\]|\\\\.)*)'\\)`);
+    const mSingle = js.match(reSingle);
+    if (mSingle) return unescapeJsStr(mSingle[1]);
+    const reDouble = new RegExp(`\\$\\(["']\\s*${esc}\\s*["']\\)\\.html\\("((?:[^"\\\\]|\\\\.)*)"\\)`);
+    const mDouble = js.match(reDouble);
+    return mDouble ? unescapeJsStr(mDouble[1]) : '';
 };
 
 // Parse a film-projection element to extract { orario, isVO, buyLink, place, day }
@@ -58,8 +62,8 @@ const parseProjections = (html, filmId, filmIsVO) => {
     for (let i = 0; i < projEls.length; i++) {
         const proj = projEls[i];
         const dateExtended = proj.getAttribute('data-date-extended') || '';
-        // "Sabato 28/02/2026 ore 17:30"
-        const dtMatch = dateExtended.match(/(\w+\s+\d+\/\d+\/\d+)\s+ore\s+(\d{1,2}:\d{2})/);
+        // "Sabato 28/02/2026 ore 17:30" or "Mercoledì 04/03/2026 ore 19:30" (accented chars)
+        const dtMatch = dateExtended.match(/(\S+\s+\d+\/\d+\/\d+)\s+ore\s+(\d{1,2}:\d{2})/);
         if (!dtMatch) continue;
 
         const dateStr = formatItalianDate(dtMatch[1]);
@@ -163,6 +167,7 @@ const parsePopupMovieDetail = async (html, movieId, csrf, cookie) => {
     const occupationPromises = dates.map(date =>
         fetch(`${filmPageUrl}/fetch_film_occupations?date=${date}`, {
             headers: {
+                'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
                 'X-Requested-With': 'XMLHttpRequest',
                 'X-CSRF-Token': csrf,
                 'Accept': 'text/javascript, application/javascript',
@@ -241,9 +246,13 @@ popupMovieRouter.route('/:movieId')
     .get(cors.cors, async (req, res, next) => {
         try {
             const filmUrl = `${popupUrl}/film/${req.params.movieId}`;
-            const filmRes = await fetch(filmUrl);
-            const cookieHeader = filmRes.headers.get('set-cookie') || '';
-            const cookie = cookieHeader.split(',').map(c => c.split(';')[0].trim()).join('; ');
+            const filmRes = await fetch(filmUrl, {
+                headers: { 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36' }
+            });
+            const setCookies = typeof filmRes.headers.getSetCookie === 'function'
+                ? filmRes.headers.getSetCookie()
+                : (filmRes.headers.get('set-cookie') || '').split(/,(?=\s*[\w-]+=)/);
+            const cookie = setCookies.map(c => c.split(';')[0].trim()).join('; ');
             const html = await filmRes.text();
 
             const csrfMatch = html.match(/name="csrf-token"\s+content="([^"]+)"/);

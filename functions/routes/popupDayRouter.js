@@ -10,10 +10,10 @@ const monthNamesShort = ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago',
 const popupDayRouter = express.Router();
 popupDayRouter.use(bodyParser.json());
 
-// Format YYYY-MM-DD → "Sab 28 Feb"
+// Format YYYY-MM-DD → "Sab 28 Feb 26"
 const formatDate = (dayStr) => {
     const d = new Date(dayStr + 'T12:00:00');
-    return `${weekDaysShort[d.getDay()]} ${d.getDate()} ${monthNamesShort[d.getMonth()]}`;
+    return `${weekDaysShort[d.getDay()]} ${d.getDate()} ${monthNamesShort[d.getMonth()]} ${String(d.getFullYear()).slice(2)}`;
 };
 
 // Extract film numeric ID from URL: /film/55686
@@ -37,12 +37,15 @@ const unescapeJsStr = (s) => s
     .replace(/\\t/g, '\t')
     .replace(/\\"/g, '"');
 
-// Extract the HTML content from a jQuery $(selector).html('...') call
+// Extract the HTML content from a jQuery $(selector).html('...') or .html("...") call
 const extractJqueryHtml = (js, selector) => {
     const esc = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const re = new RegExp(`\\$\\(["']\\s*${esc}\\s*["']\\)\\.html\\('((?:[^'\\\\]|\\\\.)*)'\\)`);
-    const m = js.match(re);
-    return m ? unescapeJsStr(m[1]) : '';
+    const reSingle = new RegExp(`\\$\\(["']\\s*${esc}\\s*["']\\)\\.html\\('((?:[^'\\\\]|\\\\.)*)'\\)`);
+    const mSingle = js.match(reSingle);
+    if (mSingle) return unescapeJsStr(mSingle[1]);
+    const reDouble = new RegExp(`\\$\\(["']\\s*${esc}\\s*["']\\)\\.html\\("((?:[^"\\\\]|\\\\.)*)"\\)`);
+    const mDouble = js.match(reDouble);
+    return mDouble ? unescapeJsStr(mDouble[1]) : '';
 };
 
 const parsePopupDayProgram = (jsResponse, day) => {
@@ -146,9 +149,13 @@ popupDayRouter.route('/:day')
     .get(cors.cors, async (req, res, next) => {
         try {
             // Get CSRF token and session cookie from the main popup page
-            const mainRes = await fetch(popupUrl);
-            const cookieHeader = mainRes.headers.get('set-cookie') || '';
-            const cookie = cookieHeader.split(',').map(c => c.split(';')[0].trim()).join('; ');
+            const mainRes = await fetch(popupUrl, {
+                headers: { 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36' }
+            });
+            const setCookies = typeof mainRes.headers.getSetCookie === 'function'
+                ? mainRes.headers.getSetCookie()
+                : (mainRes.headers.get('set-cookie') || '').split(/,(?=\s*[\w-]+=)/);
+            const cookie = setCookies.map(c => c.split(';')[0].trim()).join('; ');
             const mainHtml = await mainRes.text();
             const csrfMatch = mainHtml.match(/name="csrf-token"\s+content="([^"]+)"/);
             const csrf = csrfMatch ? csrfMatch[1] : '';
@@ -156,6 +163,7 @@ popupDayRouter.route('/:day')
             // Fetch the film list for the requested day
             const apiRes = await fetch(`${popupUrl}/film/fetch_films?date=${req.params.day}`, {
                 headers: {
+                    'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
                     'X-Requested-With': 'XMLHttpRequest',
                     'X-CSRF-Token': csrf,
                     'Accept': 'text/javascript, application/javascript',
@@ -164,6 +172,7 @@ popupDayRouter.route('/:day')
                 }
             });
             const jsResponse = await apiRes.text();
+            console.log(`popupDayRouter: date=${req.params.day} status=${apiRes.status} bodyLen=${jsResponse.length} csrfOk=${!!csrf} cookieLen=${cookie.length}`);
 
             res.json(parsePopupDayProgram(jsResponse, req.params.day));
         } catch (err) {
