@@ -20,6 +20,8 @@ var chatRouter = require('./routes/chatRouter');
 var ccbDayRouter = require('./routes/ccbDayRouter');
 var ccbMovieRouter = require('./routes/ccbMovieRouter');
 var ccbTrackRouter = require('./routes/ccbTrackRouter');
+var popupDayRouter = require('./routes/popupDayRouter');
+var popupMovieRouter = require('./routes/popupMovieRouter');
 
 const mongoose = require('mongoose');
 
@@ -53,6 +55,8 @@ app.use('/chat', chatRouter);
 app.use('/ccb-day', ccbDayRouter);
 app.use('/ccb-movies', ccbMovieRouter);
 app.use('/ccb-tracks', ccbTrackRouter);
+app.use('/popup-day', popupDayRouter);
+app.use('/popup-movies', popupMovieRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
