@@ -141,6 +141,67 @@ const parsePopupDayProgram = (jsResponse, day) => {
     }
 };
 
+const UA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
+const SESSION_TTL = 4 * 60 * 1000; // 4 minutes
+
+// Shared session cache — all concurrent requests wait on the same promise
+let sessionPromise = null;
+let sessionExpiry = 0;
+
+const fetchSession = () => {
+    const now = Date.now();
+    if (sessionPromise && now < sessionExpiry) return sessionPromise;
+    sessionExpiry = now + SESSION_TTL;
+    sessionPromise = fetch(popupUrl, { headers: { 'User-Agent': UA } })
+        .then(async r => {
+            const setCookies = typeof r.headers.getSetCookie === 'function'
+                ? r.headers.getSetCookie()
+                : (r.headers.get('set-cookie') || '').split(/,(?=\s*[\w-]+=)/);
+            const cookie = setCookies.map(c => c.split(';')[0].trim()).join('; ');
+            const html = await r.text();
+            const m = html.match(/name="csrf-token"\s+content="([^"]+)"/);
+            return { csrf: m ? m[1] : '', cookie };
+        })
+        .catch(err => {
+            sessionPromise = null; // allow retry on error
+            throw err;
+        });
+    return sessionPromise;
+};
+
+const fetchDay = async (day) => {
+    const { csrf, cookie } = await fetchSession();
+    const apiRes = await fetch(`${popupUrl}/film/fetch_films?date=${day}`, {
+        headers: {
+            'User-Agent': UA,
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-Token': csrf,
+            'Accept': 'text/javascript, application/javascript',
+            'Referer': popupUrl + '/',
+            'Cookie': cookie
+        }
+    });
+    if (apiRes.status === 422) {
+        // CSRF rejected — invalidate cache and retry once with a fresh session
+        console.log(`popupDayRouter: 422 for ${day}, refreshing session`);
+        sessionPromise = null;
+        sessionExpiry = 0;
+        const s2 = await fetchSession();
+        const retry = await fetch(`${popupUrl}/film/fetch_films?date=${day}`, {
+            headers: {
+                'User-Agent': UA,
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-Token': s2.csrf,
+                'Accept': 'text/javascript, application/javascript',
+                'Referer': popupUrl + '/',
+                'Cookie': s2.cookie
+            }
+        });
+        return retry.text();
+    }
+    return apiRes.text();
+};
+
 popupDayRouter.route('*')
     .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); });
 
@@ -148,32 +209,7 @@ popupDayRouter.route('/:day')
     .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
     .get(cors.cors, async (req, res, next) => {
         try {
-            // Get CSRF token and session cookie from the main popup page
-            const mainRes = await fetch(popupUrl, {
-                headers: { 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36' }
-            });
-            const setCookies = typeof mainRes.headers.getSetCookie === 'function'
-                ? mainRes.headers.getSetCookie()
-                : (mainRes.headers.get('set-cookie') || '').split(/,(?=\s*[\w-]+=)/);
-            const cookie = setCookies.map(c => c.split(';')[0].trim()).join('; ');
-            const mainHtml = await mainRes.text();
-            const csrfMatch = mainHtml.match(/name="csrf-token"\s+content="([^"]+)"/);
-            const csrf = csrfMatch ? csrfMatch[1] : '';
-
-            // Fetch the film list for the requested day
-            const apiRes = await fetch(`${popupUrl}/film/fetch_films?date=${req.params.day}`, {
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-Token': csrf,
-                    'Accept': 'text/javascript, application/javascript',
-                    'Referer': popupUrl + '/',
-                    'Cookie': cookie
-                }
-            });
-            const jsResponse = await apiRes.text();
-            console.log(`popupDayRouter: date=${req.params.day} status=${apiRes.status} bodyLen=${jsResponse.length} csrfOk=${!!csrf} cookieLen=${cookie.length}`);
-
+            const jsResponse = await fetchDay(req.params.day);
             res.json(parsePopupDayProgram(jsResponse, req.params.day));
         } catch (err) {
             console.log('popupDayRouter GET error:', err);
