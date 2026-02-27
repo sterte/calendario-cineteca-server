@@ -85,8 +85,22 @@ chatRouter.route('/prompt')
     var conversationId = req.body.conversationId;
     var lastMessages = [];
     var toCreate = false;
-    var title = req.body.title
-    if(!conversationId){
+    var title = req.body.title;
+    const requestType = req.body.requestType;
+
+    if (requestType && openAIConstants.promptTemplates[requestType]) {
+        // Info/similar request from movie page: build prompt from template
+        toCreate = true;
+        conversationId = new Date().getTime();
+        const template = openAIConstants.promptTemplates[requestType];
+        const movieTitle = req.body.movieTitle || '';
+        const year = req.body.year ? ' (' + req.body.year + ')' : '';
+        const fill = (str) => str.replace(/\{\{title\}\}/g, movieTitle).replace(/\{\{year\}\}/g, year);
+        lastMessages = [
+            { role: 'system', content: fill(template.system) },
+            { role: 'user',   content: fill(template.user) }
+        ];
+    } else if (!conversationId) {
         toCreate = true;
         var charachter = req.body.charachter;
         if(!charachter){
@@ -96,11 +110,11 @@ chatRouter.route('/prompt')
         }
         conversationId = new Date().getTime();
         lastMessages = [... openAIConstants.initialMessages.find(el => el.name===charachter).initialMessages];
+        lastMessages.push({"role": "user", "content": req.body.question});
     } else {
         lastMessages = myCache.get(conversationId);
+        lastMessages.push({"role": "user", "content": req.body.question});
     }
-
-    lastMessages.push({"role": "user", "content": req.body.question});
     myCache.set(conversationId, lastMessages);
     
     if(toCreate){
@@ -146,8 +160,13 @@ chatRouter.route('/prompt')
         },
         body: JSON.stringify(body)
     })    
-    .then(gptRes => gptRes.json())    
+    .then(gptRes => gptRes.json())
     .then(gptRes => {
+        if (gptRes.error) {
+            const err = new Error('OpenAI error: ' + gptRes.error.message);
+            err.status = 502;
+            return next(err);
+        }
         var result = {
             "role": gptRes.choices[0].message.role,
             "content": gptRes.choices[0].message.content,

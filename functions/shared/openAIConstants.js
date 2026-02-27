@@ -1,9 +1,23 @@
+const secrets = require('../secrets');
 exports.url = 'https://api.openai.com';
-exports.token = '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';
-exports.organizationId = 'org-zYj4x9Ta9XVh0quweXELOPLy';
-exports.model = "gpt-3.5-turbo";
+exports.token = secrets.openAIToken;
+exports.organizationId = secrets.openAIOrganizationId;
+exports.model = "gpt-4o-mini";
 exports.temperature = 0.8;
 exports.chatHistoryLenght = 10;
+
+// Prompts used for info/similar requests coming from the movie page.
+// Use {{title}} and {{year}} as placeholders — {{year}} may be empty.
+exports.promptTemplates = {
+    info: {
+        system: "Sei un esperto cinefilo. [TODO: sostituire con il prompt definitivo per le informazioni sul film]",
+        user: "Dammi informazioni sul film '{{title}}'{{year}}. [TODO: sostituire con il prompt definitivo]"
+    },
+    similar: {
+        system: "Sei un esperto cinefilo specializzato nel consigliare film. [TODO: sostituire con il prompt definitivo per i film simili]",
+        user: "Suggeriscimi film simili a '{{title}}'{{year}}. [TODO: sostituire con il prompt definitivo]"
+    }
+};
 
 exports.initialMessages = [
     {
