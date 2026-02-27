@@ -134,6 +134,11 @@ const parsePopupDayProgram = (jsResponse, day) => {
             }
         }
 
+        moviesJson.sort((a, b) => {
+            const [ah, am] = a.time.split(':').map(Number);
+            const [bh, bm] = b.time.split(':').map(Number);
+            return (ah * 60 + am) - (bh * 60 + bm);
+        });
         return [{ day, movies: moviesJson }];
     } catch (error) {
         console.log('popupDayRouter parse error:', error);
