@@ -82,13 +82,27 @@ const parseCcbMovieDetail = (html, movieSlug) => {
         const yearMatch = html.match(/_(\d{4})-/);
         const year = yearMatch ? yearMatch[1] : '';
 
+        // Country (Paese) from info-box
+        let country = '';
+        for (let i = 0; i < infoItems.length; i++) {
+            if (infoItems[i].innerHTML.includes('Paese:')) {
+                const spans = infoItems[i].getElementsByTagName('span');
+                if (spans.length > 1) country = spans[1].textContent.trim();
+                break;
+            }
+        }
+
         // isVO from og:title containing "v. o."
         const filmIsVO = ogTitle.toLowerCase().includes('v. o.');
 
         // Build duration string that client can parse for IMDB lookup:
-        // format: "<span>Original Title</span> (/Year) Duration"
+        // format: "<span>Original Title</span> (Country/Year) Duration"
         // client extracts: span.textContent for title, between '/' and ')' for year
-        const durationFormatted = `<span>${originalTitle || title}</span> (/${year}) ${durationValue}`;
+        const countryYear = country && year ? `${country}/${year}`
+            : country ? country
+            : year ? `/${year}`
+            : '';
+        const durationFormatted = `<span>${originalTitle || title}</span>${countryYear ? ' (' + countryYear + ')' : ''} ${durationValue}`.trim();
 
         // Buy link (first button-cta with an http href)
         const buyLinkEls = parsed.getElementsByClassName('button-cta');
