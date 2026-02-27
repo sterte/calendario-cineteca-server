@@ -59,7 +59,17 @@ router.post('/signup', cors.corsWithOptions, function(req, res, next){ //explici
   }, (err) => console.log(err));  
 });
 
-router.post('/login', cors.corsWithOptions, (req, res, next) => { //arrow function analogue to explicit function (see above)
+router.post('/login', cors.corsWithOptions, async (req, res, next) => {
+  // Allow login with email: resolve to username before passport authenticates
+  const loginField = req.body.username;
+  if (loginField && loginField.includes('@')) {
+    try {
+      const user = await User.findOne({ email: loginField.toLowerCase().trim() });
+      if (user) req.body.username = user.username;
+    } catch (err) {
+      return next(err);
+    }
+  }
   passport.authenticate('local', (err, user, info) => {
     if(err){
       return next(err);
