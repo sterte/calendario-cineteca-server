@@ -3,7 +3,9 @@ const secrets = require('./secrets');
 
 module.exports = {
     'secretKey': secrets.secretMain,
-    'mongoUrl': 'mongodb+srv://cinetecalendar:lKa9YpNKufvIMKLE@cluster-sterte.ommw6.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'
+    'mongoUrl': 'mongodb+srv://cinetecalendar:lKa9YpNKufvIMKLE@cluster-sterte.ommw6.mongodb.net/myFirstDatabase?retryWrites=true&w=majority',
+    'email': secrets.email,
+    'resetPasswordBaseUrl': 'https://cinetecalendar.web.app/reset-password'
     /*,
     'facebook' : {
         clientId: '397746814547445',

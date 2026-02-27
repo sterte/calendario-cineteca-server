@@ -14,6 +14,18 @@ var User = new Schema({
     admin: {
         type: Boolean,
         default: false
+    },
+    email: {
+        type: String,
+        default: ''
+    },
+    resetPasswordToken: {
+        type: String,
+        default: null
+    },
+    resetPasswordExpires: {
+        type: Date,
+        default: null
     }
 });
 

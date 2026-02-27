@@ -4,6 +4,8 @@ var User = require('../models/user');
 var passport = require('passport');
 var authenticate = require('../authenticate');
 const cors = require('./cors');
+const crypto = require('crypto');
+const mailer = require('../mailer');
 
 var router = express.Router();
 router.use(bodyParser.json());
@@ -36,6 +38,9 @@ router.post('/signup', cors.corsWithOptions, function(req, res, next){ //explici
       }
       if(req.body.lastname){
         user.lastname = req.body.lastname;
+      }
+      if(req.body.email){
+        user.email = req.body.email.toLowerCase().trim();
       }
       user.save()
         .then((savedUser) => {
@@ -127,5 +132,56 @@ router.get('/checkJWTToken', cors.corsWithOptions, (req, res) => {
     }
   }) (req, res);
 })
+
+// POST /users/reset-request  { email }
+router.post('/reset-request', cors.corsWithOptions, async (req, res, next) => {
+    try {
+        const { email } = req.body;
+        if (!email) {
+            return res.status(400).json({ success: false, err: 'Email richiesta' });
+        }
+        const user = await User.findOne({ email: email.toLowerCase().trim() });
+        // Always respond 200 to avoid leaking whether email is registered
+        if (!user) {
+            return res.json({ success: true, status: 'Se l\'email è registrata, riceverai un link per il reset' });
+        }
+        const token = crypto.randomBytes(32).toString('hex');
+        user.resetPasswordToken = token;
+        user.resetPasswordExpires = new Date(Date.now() + 3600000); // 1 hour
+        await user.save();
+        try {
+            await mailer.sendPasswordReset(user.email, token);
+        } catch (mailErr) {
+            console.error('Mailer error:', mailErr.message);
+        }
+        res.json({ success: true, status: 'Se l\'email è registrata, riceverai un link per il reset' });
+    } catch (err) {
+        next(err);
+    }
+});
+
+// POST /users/reset-password  { token, newPassword }
+router.post('/reset-password', cors.corsWithOptions, async (req, res, next) => {
+    try {
+        const { token, newPassword } = req.body;
+        if (!token || !newPassword) {
+            return res.status(400).json({ success: false, err: 'Token e nuova password richiesti' });
+        }
+        const user = await User.findOne({
+            resetPasswordToken: token,
+            resetPasswordExpires: { $gt: new Date() }
+        });
+        if (!user) {
+            return res.status(400).json({ success: false, err: 'Token non valido o scaduto' });
+        }
+        await user.setPassword(newPassword);
+        user.resetPasswordToken = null;
+        user.resetPasswordExpires = null;
+        await user.save();
+        res.json({ success: true, status: 'Password aggiornata con successo' });
+    } catch (err) {
+        next(err);
+    }
+});
 
 module.exports = router;
