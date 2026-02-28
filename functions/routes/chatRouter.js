@@ -94,8 +94,12 @@ chatRouter.route('/prompt')
         conversationId = new Date().getTime();
         const template = openAIConstants.promptTemplates[requestType];
         const movieTitle = req.body.movieTitle || '';
-        const year = req.body.year ? ' (' + req.body.year + ')' : '';
-        const fill = (str) => str.replace(/\{\{title\}\}/g, movieTitle).replace(/\{\{year\}\}/g, year);
+        const year = req.body.year || '';
+        const spoiler = req.body.spoiler === true ? 'true' : 'false';
+        const fill = (str) => str
+            .replace(/\{\{title\}\}/g, movieTitle)
+            .replace(/\{\{year\}\}/g, year)
+            .replace(/\{\{spoiler\}\}/g, spoiler);
         lastMessages = [
             { role: 'system', content: fill(template.system) },
             { role: 'user',   content: fill(template.user) }
@@ -118,7 +122,7 @@ chatRouter.route('/prompt')
     myCache.set(conversationId, lastMessages);
     
     if(toCreate){
-    AiConversation.create({ user: req.user._id, title: '', charachter: charachter, conversationId: conversationId, title: title})
+    AiConversation.create({ user: req.user._id, charachter: charachter || 'cinefilo', conversationId: conversationId, title: title})
         .then((conversation) => {
             AiMessage.create({ conversation: conversation._id, content: req.body.question, timestamp: new Date().getTime(), role: 'user'})
         })
