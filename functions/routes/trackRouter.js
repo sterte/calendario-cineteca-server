@@ -81,7 +81,7 @@ trackRouter.route('/')
         contentType: "text/html; charset=iso-8859-1",
       }})    
     .then(res => res.text())
-    .then((res) => parseUtils.forceCharachtersEncoding(res))
+    .then((res) => parseUtils.decodeEntities(res))
     .then(html => {
         res.json(parseTracksList(html, url));
     })    
@@ -109,7 +109,7 @@ trackRouter.route('/:trackId')
         contentType: "text/html; charset=iso-8859-1",
       }})    
     .then(res => res.text())
-    .then((res) => parseUtils.forceCharachtersEncoding(res))
+    .then((res) => parseUtils.decodeEntities(res))
     .then(html => {
         const details = parseTrackDetail(html, url);
         if(details.errMess){

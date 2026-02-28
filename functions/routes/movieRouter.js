@@ -130,7 +130,7 @@ movieRouter.route('/:categoryId/:movieId/:repeatId')
         contentType: "text/html; charset=iso-8859-1",
       }})    
     .then(res => res.text())
-    .then((res) => parseUtils.forceCharachtersEncoding(res))
+    .then((res) => parseUtils.decodeEntities(res))
     .then(html => {
         const details = parseMovieDetail(html, url);
         if(details.errMess){

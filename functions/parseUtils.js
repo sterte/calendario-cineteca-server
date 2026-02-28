@@ -1,12 +1,10 @@
-exports.forceCharachtersEncoding = (text) => {
-    text = text.replace(/&#8217;/g, '\'');
-    text = text.replace(/&#8211;/g, '-');   
-    text = text.replace(/&#8230;/g, '...');   
-    text = text.replace(/&#8216;/g, "'");      
-    text = text.replace(/&#8242;/g, "'");      
-    text = text.replace(/&amp;/g, "&");     
-    return text;
-};
+exports.decodeEntities = (text) => text
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(parseInt(code, 10)))
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'");
 
 
 exports.parseMovie = (movie, key = -1) => {
@@ -37,7 +35,7 @@ exports.parseMovie = (movie, key = -1) => {
         image = image.getAttribute('src');
         var durata = movie.getElementsByClassName('c-repeat-loop__title-info')[0].textContent;
         if(durata.includes('(')){
-        durata = this.forceCharachtersEncoding(durata.split('(')[1].split(')')[0]);
+        durata = exports.decodeEntities(durata.split('(')[1].split(')')[0]);
         } else {
             durata = ''
         }
