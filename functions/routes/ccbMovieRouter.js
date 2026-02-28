@@ -78,7 +78,7 @@ const parseCcbMovieDetail = (html, movieSlug) => {
         // Capitalize words of original title
         originalTitle = originalTitle.replace(/\b\w/g, c => c.toUpperCase());
 
-        // Year from ticket URL pattern "_YYYY-"
+        // Year from ticket URL pattern "_YYYY-" (best-effort)
         const yearMatch = html.match(/_(\d{4})-/);
         const year = yearMatch ? yearMatch[1] : '';
 
@@ -91,6 +91,17 @@ const parseCcbMovieDetail = (html, movieSlug) => {
                 break;
             }
         }
+
+        // Director from .item-subtitle: "di Nome Cognome"
+        let director = '';
+        const subtitleEls = parsed.getElementsByClassName('item-subtitle');
+        if (subtitleEls.length > 0) {
+            const raw = subtitleEls[0].textContent.trim();
+            director = raw.replace(/^di\s+/i, '').trim();
+        }
+
+        // Duration as number (e.g. "93 min" → 93)
+        const durationMinutes = durationValue ? parseInt(durationValue) || 0 : 0;
 
         // isVO from og:title containing "v. o."
         const filmIsVO = ogTitle.toLowerCase().includes('v. o.');
@@ -152,6 +163,11 @@ const parseCcbMovieDetail = (html, movieSlug) => {
         return {
             title,
             duration: durationFormatted,
+            originalTitle,
+            country,
+            year,
+            director,
+            durationMinutes,
             summary,
             image,
             currentHour,

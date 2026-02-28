@@ -137,8 +137,10 @@ const parsePopupMovieDetail = async (html, movieId, csrf, cookie) => {
         if (m) { durationMin = m[1]; break; }
     }
 
-    // Year and other metadata
+    // Year, director and other metadata
     const year = getMovieOption(parsed, 'Anno:');
+    const director = getMovieOption(parsed, 'Regia:');
+    const durationMinutes = durationMin ? parseInt(durationMin) || 0 : 0;
 
     // Plot: find div with id='plotPanel' then .card-body
     let summary = '';
@@ -229,6 +231,11 @@ const parsePopupMovieDetail = async (html, movieId, csrf, cookie) => {
     return {
         title,
         duration,
+        originalTitle,
+        country: '',
+        year,
+        director,
+        durationMinutes,
         summary,
         image,
         currentHour,

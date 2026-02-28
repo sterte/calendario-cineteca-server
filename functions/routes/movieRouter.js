@@ -18,8 +18,42 @@ const parseMovieDetail = (html, originalUrl) => {
         const parser = new DOMParser();
         const parsed = parser.parseFromString(html, 'text/html');    
 
-        const title = parsed.getElementsByClassName('c-show-single-page-title__title').length > 0 ? parsed.getElementsByClassName('c-show-single-page-title__title')[0].innerHTML : '';                
-        var durata = parsed.getElementsByClassName('c-show-single-page-title__title-info')[0].innerHTML;
+        const title = parsed.getElementsByClassName('c-show-single-page-title__title').length > 0 ? parsed.getElementsByClassName('c-show-single-page-title__title')[0].innerHTML : '';
+
+        // Parse title-info: "(<span>ORIG_TITLE</span>, PAESE/ANNO)  di REGISTA (DURATA')"
+        //                or "(PAESE/ANNO)  di REGISTA (DURATA')"
+        const titleInfoEls = parsed.getElementsByClassName('c-show-single-page-title__title-info');
+        var durata = titleInfoEls.length > 0 ? titleInfoEls[0].innerHTML : '';
+        var originalTitle = '';
+        var country = '';
+        var year = '';
+        var director = '';
+        var durationMinutes = 0;
+        if (titleInfoEls.length > 0) {
+            const origSpans = titleInfoEls[0].getElementsByClassName('c-original-title');
+            if (origSpans.length > 0) {
+                originalTitle = parseUtils.decodeEntities(origSpans[0].textContent.trim());
+            }
+            const infoText = titleInfoEls[0].textContent.trim();
+            // Country/year: last WORD/DIGITS pattern inside first parenthetical
+            const firstParenMatch = infoText.match(/^\(([^)]*)\)/);
+            if (firstParenMatch) {
+                const inner = firstParenMatch[1];
+                const lastComma = inner.lastIndexOf(',');
+                const countryYear = (lastComma >= 0 ? inner.substring(lastComma + 1) : inner).trim();
+                const slash = countryYear.indexOf('/');
+                if (slash >= 0) {
+                    country = countryYear.substring(0, slash).trim();
+                    year = countryYear.substring(slash + 1).trim();
+                }
+            }
+            // Director: between first ")" and last "("
+            const dirMatch = infoText.match(/\)\s+di\s+(.+?)\s*\(\d/);
+            if (dirMatch) director = dirMatch[1].trim();
+            // Duration in minutes: last (NUMBER...) at end of string
+            const durMatch = infoText.match(/\((\d+)[^)]*\)\s*$/);
+            if (durMatch) durationMinutes = parseInt(durMatch[1]);
+        }
         var image = parsed.getElementsByClassName('c-show-single-gallery')[0].getElementsByTagName('img');
         image = image.length > 0 ? image[0].getAttribute('src') : '';             
         
@@ -112,7 +146,7 @@ const parseMovieDetail = (html, originalUrl) => {
             }
         }        
                 
-        movie = {title: title, duration: durata, summary: sinossi, image: image, currentHour: currentHour, hours: days, originalUrl: originalUrl, buyLink: buyLink};        
+        movie = {title, duration: durata, originalTitle, country, year, director, durationMinutes, summary: sinossi, image, currentHour, hours: days, originalUrl, buyLink};
         return movie;
     }catch(error){
         console.log(error)
