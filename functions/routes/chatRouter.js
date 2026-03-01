@@ -12,12 +12,6 @@ const chatRouter = express.Router();
 
 chatRouter.use(bodyParser.json());
 
-chatRouter.route('/charachters')
-.options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
-.get(cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
-    let result = openAIConstants.initialMessages.map(el => {return {"value": el.name, "label": el.description}})
-    res.json(result)
-})
 
 chatRouter.route('/previousConversations')
 .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
@@ -104,17 +98,6 @@ chatRouter.route('/prompt')
             { role: 'system', content: fill(template.system) },
             { role: 'user',   content: fill(template.user) }
         ];
-    } else if (!conversationId) {
-        toCreate = true;
-        var charachter = req.body.charachter;
-        if(!charachter){
-            err = new Error('Malformed request: no charachter selected, no conversationId given.');
-            err.status = 400;
-            return next(err);
-        }
-        conversationId = new Date().getTime();
-        lastMessages = [... openAIConstants.initialMessages.find(el => el.name===charachter).initialMessages];
-        lastMessages.push({"role": "user", "content": req.body.question});
     } else {
         lastMessages = myCache.get(conversationId);
         lastMessages.push({"role": "user", "content": req.body.question});
