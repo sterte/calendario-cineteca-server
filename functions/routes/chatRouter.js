@@ -142,7 +142,6 @@ chatRouter.route('/prompt')
         method: 'POST',
         headers:{
             'Authorization': 'Bearer ' + openAIConstants.token,
-            'OpenAI-Organization' : openAIConstants.organizationId,
             'Content-Type': "application/json",
         },
         body: JSON.stringify(body)
@@ -150,7 +149,7 @@ chatRouter.route('/prompt')
     .then(gptRes => gptRes.json())
     .then(gptRes => {
         if (gptRes.error) {
-            const err = new Error('OpenAI error: ' + gptRes.error.message);
+            const err = new Error('Gemini error: ' + gptRes.error.message);
             err.status = 502;
             return next(err);
         }

@@ -1,8 +1,7 @@
 const secrets = require('../secrets');
-exports.url = 'https://api.openai.com';
-exports.token = secrets.openAIToken;
-exports.organizationId = secrets.openAIOrganizationId;
-exports.model = "gpt-4o-mini";
+exports.url = 'https://generativelanguage.googleapis.com/v1beta/openai';
+exports.token = secrets.geminiToken;
+exports.model = "gemini-2.0-flash";
 exports.temperature = 0.8;
 exports.chatHistoryLenght = 10;
 
