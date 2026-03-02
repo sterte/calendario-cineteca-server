@@ -54,7 +54,7 @@ favouriteRouter.route('/:favouriteId')
     .then((favourite) => {
         if(favourite != null){
             if(!favourite.user.equals(req.user._id)){
-                err = new Error('You are not authorized to visualize this content.');
+                const err = new Error('You are not authorized to visualize this content.');
                 err.status = 403;
                 return next(err);
             }
@@ -65,7 +65,7 @@ favouriteRouter.route('/:favouriteId')
             }
         }
         else{
-            err = new Error('Favourite ' + req.params.favouriteId + ' not found');
+            const err = new Error('Favourite ' + req.params.favouriteId + ' not found');
             err.status = 404;
             return next(err);
         }
@@ -81,7 +81,7 @@ favouriteRouter.route('/:favouriteId')
     .then((favourite) => {
         if(favourite != null){
             if(!favourite.user.equals(req.user._id)){
-                err = new Error('You are not authorized to modify this favourite.');
+                const err = new Error('You are not authorized to modify this favourite.');
                 err.status = 403;
                 return next(err);
             }
@@ -98,7 +98,7 @@ favouriteRouter.route('/:favouriteId')
             }, (err) => {console.log(err); next(err)})
         }
         else{
-            err = new Error('Favourite ' + req.params.favouriteId + ' not found');
+            const err = new Error('Favourite ' + req.params.favouriteId + ' not found');
             err.status = 404;
             return next(err);
         }
@@ -110,7 +110,7 @@ favouriteRouter.route('/:favouriteId')
     .then((favourite) => {
         if(favourite != null){
             if(!favourite.user.equals(req.user._id)){
-                err = new Error('You are not authorized to delete this favourite.');
+                const err = new Error('You are not authorized to delete this favourite.');
                 err.status = 403;
                 return next(err);
             }
@@ -123,7 +123,7 @@ favouriteRouter.route('/:favouriteId')
             .catch((err) => next(err));
         }     
         else {
-            err = new Error('Favourite ' + req.params.favouriteId + ' not found');
+            const err = new Error('Favourite ' + req.params.favouriteId + ' not found');
             err.status = 404;
             return next(err);
         }        

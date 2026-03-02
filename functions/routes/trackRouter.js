@@ -37,7 +37,7 @@ const parseTracksList = (html, originalUrl) => {
 }
 
 const parseTrackDetail = (html, originalUrl) => {    
-    var track = {};
+    const track = {};
 
     const parser = new DOMParser();
     const parsed = parser.parseFromString(html, 'text/html');    
@@ -45,7 +45,7 @@ const parseTrackDetail = (html, originalUrl) => {
     const title = parsed.getElementsByClassName('c-exhibition-cover__title')[0].innerHTML;
     track.title = title;
 
-    var description = "";
+    let description = "";
     if(parsed.getElementsByClassName('wp-block-qtheme-text-editor-content-inner').length > 0){
         description = parsed.getElementsByClassName('wp-block-qtheme-text-editor-content-inner')[0].innerHTML;
     } else if(parsed.getElementsByClassName('c-exhibition-cover__subtitle').length > 0){
@@ -54,7 +54,7 @@ const parseTrackDetail = (html, originalUrl) => {
 
     track.description = description;
 
-    tmpMovies = [];
+    const tmpMovies = [];
     if(parsed.getElementsByClassName('c-archive__items').length > 0){
         const movies = parsed.getElementsByClassName('c-archive__items')[0].getElementsByTagName('article');
         for(let i=0;i<movies.length;i++){

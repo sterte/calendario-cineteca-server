@@ -1,27 +1,27 @@
-var createError = require('http-errors');
-var express = require('express');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-var session = require('express-session');
-var FileStore = require('session-file-store')(session);
-var passport = require('passport');
-var compression = require('compression');
-var helmet = require('helmet');
-var authenticate = require('./authenticate');
-var config = require('./config');
+const createError = require('http-errors');
+const express = require('express');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+const session = require('express-session');
+const FileStore = require('session-file-store')(session);
+const passport = require('passport');
+const compression = require('compression');
+const helmet = require('helmet');
+const authenticate = require('./authenticate');
+const config = require('./config');
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
-var daysRouter = require('./routes/dayRouter');
-var moviesRouter = require('./routes/movieRouter');
-var favouritesRouter = require('./routes/favouriteRouter');
-var trackRouter = require('./routes/trackRouter');
-var chatRouter = require('./routes/chatRouter');
-var ccbDayRouter = require('./routes/ccbDayRouter');
-var ccbMovieRouter = require('./routes/ccbMovieRouter');
-var ccbTrackRouter = require('./routes/ccbTrackRouter');
-var popupDayRouter = require('./routes/popupDayRouter');
-var popupMovieRouter = require('./routes/popupMovieRouter');
+const indexRouter = require('./routes/index');
+const usersRouter = require('./routes/users');
+const daysRouter = require('./routes/dayRouter');
+const moviesRouter = require('./routes/movieRouter');
+const favouritesRouter = require('./routes/favouriteRouter');
+const trackRouter = require('./routes/trackRouter');
+const chatRouter = require('./routes/chatRouter');
+const ccbDayRouter = require('./routes/ccbDayRouter');
+const ccbMovieRouter = require('./routes/ccbMovieRouter');
+const ccbTrackRouter = require('./routes/ccbTrackRouter');
+const popupDayRouter = require('./routes/popupDayRouter');
+const popupMovieRouter = require('./routes/popupMovieRouter');
 
 const mongoose = require('mongoose');
 
@@ -35,7 +35,7 @@ connect.then((db) => {
   console.log(err);
 });
 
-var app = express();
+const app = express();
 
 app.use(helmet());
 app.use(compression());

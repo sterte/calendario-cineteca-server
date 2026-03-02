@@ -1,12 +1,11 @@
-var mongoose = require('mongoose');
-const { use } = require('passport');
-var Schema = mongoose.Schema;
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
-var Favourite = new Schema({
+const Favourite = new Schema({
     user: {
         type: Schema.Types.ObjectId,
         ref: 'User',
-        required: true,        
+        required: true,
     },
     title: {
         type: String,
@@ -14,17 +13,15 @@ var Favourite = new Schema({
     },
     rating: {
         type: Number,
-        default: 0,        
+        default: 0,
         min: 0,
         max: 10,
         required: true
     },
     comment: {
         type: String,
-        default:''
+        default: ''
     }
 });
-
-
 
 module.exports = mongoose.model('Favourite', Favourite);

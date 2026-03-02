@@ -1,12 +1,11 @@
-var mongoose = require('mongoose');
-const { use } = require('passport');
-var Schema = mongoose.Schema;
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
-var AiMessage = new Schema({
+const AiMessage = new Schema({
     conversation: {
         type: Schema.Types.ObjectId,
         ref: 'AiConversation',
-        required: true,        
+        required: true,
     },
     content: {
         type: String,
@@ -21,7 +20,5 @@ var AiMessage = new Schema({
         required: true
     }
 });
-
-
 
 module.exports = mongoose.model('AiMessage', AiMessage);
