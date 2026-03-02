@@ -31,9 +31,6 @@ const parseDayProgram = (html, day) => {
 }
 
 
-dayRouter.route('*')
-.options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
-
 dayRouter.route('/:day')
 .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 .get(cors.cors, (req, res, next) => {    

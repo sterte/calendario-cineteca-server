@@ -181,8 +181,6 @@ const parseCcbMovieDetail = (html, movieSlug) => {
     }
 };
 
-ccbMovieRouter.route('*')
-.options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); });
 
 ccbMovieRouter.route('/:movieSlug')
 .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })

@@ -158,8 +158,6 @@ const parseCcbTrackDetail = (html) => {
     }
 };
 
-ccbTrackRouter.route('*')
-.options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); });
 
 ccbTrackRouter.route('/')
 .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
