@@ -105,7 +105,7 @@ chatRouter.route('/prompt')
     myCache.set(conversationId, lastMessages);
     
     if(toCreate){
-    AiConversation.create({ user: req.user._id, charachter: charachter || 'cinefilo', conversationId: conversationId, title: title})
+    AiConversation.create({ user: req.user._id, conversationId: conversationId, title: title})
         .then((conversation) => {
             AiMessage.create({ conversation: conversation._id, content: req.body.question, timestamp: new Date().getTime(), role: 'user'})
         })
@@ -148,8 +148,15 @@ chatRouter.route('/prompt')
     })    
     .then(gptRes => gptRes.json())
     .then(gptRes => {
-        if (gptRes.error) {
-            const err = new Error('Gemini error: ' + gptRes.error.message);
+        const geminiError = gptRes.error || (Array.isArray(gptRes) && gptRes[0]?.error);
+        if (geminiError) {
+            const err = new Error('Gemini error: ' + geminiError.message);
+            err.status = geminiError.code === 429 ? 429 : 502;
+            return next(err);
+        }
+        if (!gptRes.choices || !gptRes.choices[0]) {
+            console.error('Unexpected Gemini response:', JSON.stringify(gptRes));
+            const err = new Error('Gemini error: risposta inattesa dal modello');
             err.status = 502;
             return next(err);
         }

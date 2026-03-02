@@ -1,9 +1,9 @@
 const secrets = require('../secrets');
-exports.url = 'https://generativelanguage.googleapis.com/v1beta/openai';
-exports.token = secrets.geminiToken;
-exports.model = "gemini-2.0-flash";
-exports.temperature = 0.8;
-exports.chatHistoryLenght = 10;
+exports.url = 'https://api.mistral.ai';
+exports.token = secrets.aiToken;
+exports.model = "mistral-small-latest";
+exports.temperature = 0.3;
+exports.chatHistoryLenght = 5;
 
 // Prompts used for info/similar requests coming from the movie page.
 // Placeholders: {{title}}, {{year}}, {{spoiler}} (info only).

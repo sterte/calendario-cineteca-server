@@ -13,10 +13,6 @@ var AiConversation = new Schema({
         type: String,
         required: false
     },
-    charachter: {
-        type: String,
-        required: true
-    },
     conversationId: {
         type: Number,
         required: true
