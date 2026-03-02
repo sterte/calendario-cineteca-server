@@ -245,6 +245,8 @@ const parsePopupMovieDetail = async (html, movieId, csrf, cookie) => {
     };
 };
 
+popupMovieRouter.route('*')
+    .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); });
 
 popupMovieRouter.route('/:movieId')
     .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })

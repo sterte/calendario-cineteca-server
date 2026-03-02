@@ -105,6 +105,8 @@ const parseCcbDayProgram = (html, day) => {
     }
 };
 
+ccbDayRouter.route('*')
+.options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); });
 
 ccbDayRouter.route('/:day')
 .options(cors.corsWithOptions, (req, res) => { res.sendStatus(200); })

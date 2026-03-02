@@ -12,7 +12,7 @@ router.use(bodyParser.json());
 
 
 
-router.options('/{*path}', cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
+router.options('*', cors.corsWithOptions, (req, res) => { res.sendStatus(200); })
 
 /* GET users listing. */
 router.get('/', cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, function(req, res, next) {
