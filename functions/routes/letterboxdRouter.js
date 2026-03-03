@@ -93,26 +93,50 @@ router.get('/watchlist', cors.corsWithOptions, authenticate.verifyUser, async (r
 
         const { memberId } = memberData;
 
-        // Step 2: fetch watchlist (cached)
+        // Step 2: fetch full paginated watchlist (cached)
         const watchlistKey = `lb:watchlist:${memberId}`;
         let filmSlugs = cache.get(watchlistKey);
         if (!filmSlugs) {
-            const wlRes = await fetch(
-                `https://${LB_HOST}/api/letterboxd/member/${encodeURIComponent(memberId)}/watchlist`,
-                { headers: HEADERS }
-            );
-            if (!wlRes.ok) throw new Error('Letterboxd watchlist error ' + wlRes.status);
-            const wlData = await wlRes.json();
+            filmSlugs = [];
+            const baseUrl = `https://${LB_HOST}/api/letterboxd/member/${encodeURIComponent(memberId)}/watchlist`;
+            let cursor = null;
+            let page = 1;
+            const MAX_PAGES = 50; // safety cap
 
-            const entries = Array.isArray(wlData.entries) ? wlData.entries
-                : Array.isArray(wlData.items) ? wlData.items
-                : Array.isArray(wlData.films) ? wlData.films
-                : Array.isArray(wlData) ? wlData : [];
+            for (let i = 0; i < MAX_PAGES; i++) {
+                const url = new URL(baseUrl);
+                if (cursor) url.searchParams.set('cursor', cursor);
+                else if (page > 1) url.searchParams.set('page', page);
 
-            filmSlugs = entries.map(el => {
-                const film = el.film || el;
-                return film.id || film.slug;
-            }).filter(Boolean);
+                const wlRes = await fetch(url.toString(), { headers: HEADERS });
+                if (!wlRes.ok) throw new Error('Letterboxd watchlist error ' + wlRes.status);
+                const wlData = await wlRes.json();
+
+                const entries = Array.isArray(wlData.entries) ? wlData.entries
+                    : Array.isArray(wlData.items) ? wlData.items
+                    : Array.isArray(wlData.films) ? wlData.films
+                    : Array.isArray(wlData) ? wlData : [];
+
+                const pageSlugs = entries.map(el => {
+                    const film = el.film || el;
+                    return film.id || film.slug;
+                }).filter(Boolean);
+
+                filmSlugs.push(...pageSlugs);
+
+                // Determine if there is a next page
+                const nextCursor = wlData.next || wlData.cursor?.next || wlData.nextCursor || null;
+                const totalPages = wlData.totalPages || wlData.pages || null;
+
+                if (nextCursor) {
+                    cursor = nextCursor;
+                } else if (totalPages && page < totalPages) {
+                    page++;
+                } else {
+                    break; // no more pages
+                }
+            }
+
             cache.set(watchlistKey, filmSlugs);
         }
 

@@ -1,4 +1,4 @@
-const TTL = 24 * 60 * 60 * 1000; // 24 hours
+const TTL = 7 * 24 * 60 * 60 * 1000; // 1 week
 
 class ApiCache {
     constructor() {
@@ -22,6 +22,25 @@ class ApiCache {
 
     set(key, data) {
         this._store.set(key, { data, fetchedAt: Date.now() });
+    }
+
+    clear(prefix) {
+        if (prefix) {
+            for (const k of this._store.keys()) {
+                if (k.startsWith(prefix)) this._store.delete(k);
+            }
+        } else {
+            this._store.clear();
+        }
+    }
+
+    getContent() {
+        const now = Date.now();
+        const result = {};
+        for (const [k, { data, fetchedAt }] of this._store.entries()) {
+            result[k] = { data, fetchedAt: new Date(fetchedAt).toISOString(), expiresIn: Math.round((TTL - (now - fetchedAt)) / 1000) + 's' };
+        }
+        return result;
     }
 
     getStats() {
