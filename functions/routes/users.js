@@ -125,6 +125,11 @@ const getSessionToken = (req, res, next) => {
 //router.get('/google/token', passport.authenticate('google', { scope: ['https://www.googleapis.com/auth/plus.login']}), getSessionToken);
 
 
+router.get('/refresh-token', cors.corsWithOptions, authenticate.verifyUser, (req, res) => {
+    const token = authenticate.getToken({ _id: req.user._id });
+    res.json({ success: true, token });
+});
+
 router.get('/checkJWTToken', cors.corsWithOptions, (req, res) => {
   passport.authenticate('jwt', {session: false}, (err, user, info) => {
     if(err){
