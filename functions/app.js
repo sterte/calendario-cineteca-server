@@ -22,6 +22,8 @@ const ccbMovieRouter = require('./routes/ccbMovieRouter');
 const ccbTrackRouter = require('./routes/ccbTrackRouter');
 const popupDayRouter = require('./routes/popupDayRouter');
 const popupMovieRouter = require('./routes/popupMovieRouter');
+const imdbRouter = require('./routes/imdbRouter');
+const letterboxdRouter = require('./routes/letterboxdRouter');
 
 const mongoose = require('mongoose');
 
@@ -57,6 +59,8 @@ app.use('/ccb-movies', ccbMovieRouter);
 app.use('/ccb-tracks', ccbTrackRouter);
 app.use('/popup-day', popupDayRouter);
 app.use('/popup-movies', popupMovieRouter);
+app.use('/imdb', imdbRouter);
+app.use('/letterboxd', letterboxdRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

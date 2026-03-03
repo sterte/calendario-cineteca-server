@@ -5,7 +5,8 @@ module.exports = {
     'secretKey': secrets.secretMain,
     'mongoUrl': secrets.mongoUrl,
     'email': secrets.email,
-    'resetPasswordBaseUrl': 'https://cinetecalendar.web.app/reset-password'
+    'resetPasswordBaseUrl': 'https://cinetecalendar.web.app/reset-password',
+    'rapidApiKey': secrets.rapidApiKey
     /*,
     'facebook' : {
         clientId: '397746814547445',
