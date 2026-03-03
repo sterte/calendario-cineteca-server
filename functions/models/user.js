@@ -26,6 +26,18 @@ var User = new Schema({
     resetPasswordExpires: {
         type: Date,
         default: null
+    },
+    imdbEnabled: {
+        type: Boolean,
+        default: true
+    },
+    letterboxdEnabled: {
+        type: Boolean,
+        default: true
+    },
+    letterboxdUsername: {
+        type: String,
+        default: ''
     }
 });
 

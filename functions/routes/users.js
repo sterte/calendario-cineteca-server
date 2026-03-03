@@ -194,4 +194,25 @@ router.post('/reset-password', cors.corsWithOptions, async (req, res, next) => {
     }
 });
 
+// GET /users/preferences
+router.get('/preferences', cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
+    const { imdbEnabled, letterboxdEnabled, letterboxdUsername, email } = req.user;
+    res.json({ imdbEnabled, letterboxdEnabled, letterboxdUsername, email: email || '' });
+});
+
+// PUT /users/preferences  { imdbEnabled, letterboxdEnabled, letterboxdUsername }
+router.put('/preferences', cors.corsWithOptions, authenticate.verifyUser, async (req, res, next) => {
+    try {
+        const { imdbEnabled, letterboxdEnabled, letterboxdUsername } = req.body;
+        const user = await User.findById(req.user._id);
+        if (imdbEnabled !== undefined) user.imdbEnabled = imdbEnabled;
+        if (letterboxdEnabled !== undefined) user.letterboxdEnabled = letterboxdEnabled;
+        if (letterboxdUsername !== undefined) user.letterboxdUsername = letterboxdUsername.trim();
+        await user.save();
+        res.json({ imdbEnabled: user.imdbEnabled, letterboxdEnabled: user.letterboxdEnabled, letterboxdUsername: user.letterboxdUsername });
+    } catch (err) {
+        next(err);
+    }
+});
+
 module.exports = router;
