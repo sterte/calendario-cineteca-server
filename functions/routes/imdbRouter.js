@@ -12,6 +12,7 @@ const HEADERS = {
 };
 
 // GET /imdb?title=X&year=Y
+router.options('/', cors.corsWithOptions, (req, res) => { res.sendStatus(200); });
 router.get('/', cors.corsWithOptions, authenticate.verifyUser, async (req, res, next) => {
     const { title, year } = req.query;
     if (!title || !year) return res.status(400).json({ error: 'title and year required' });

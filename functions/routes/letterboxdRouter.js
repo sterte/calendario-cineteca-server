@@ -12,6 +12,7 @@ const HEADERS = {
 };
 
 // GET /letterboxd/film?title=X&year=Y
+router.options('/film', cors.corsWithOptions, (req, res) => { res.sendStatus(200); });
 router.get('/film', cors.corsWithOptions, authenticate.verifyUser, async (req, res, next) => {
     const { title, year } = req.query;
     if (!title || !year) return res.status(400).json({ error: 'title and year required' });
@@ -57,6 +58,7 @@ router.get('/film', cors.corsWithOptions, authenticate.verifyUser, async (req, r
 });
 
 // GET /letterboxd/watchlist?username=X&filmSlug=Y
+router.options('/watchlist', cors.corsWithOptions, (req, res) => { res.sendStatus(200); });
 router.get('/watchlist', cors.corsWithOptions, authenticate.verifyUser, async (req, res, next) => {
     const { username, filmSlug } = req.query;
     if (!username || !filmSlug) return res.status(400).json({ error: 'username and filmSlug required' });
@@ -120,9 +122,5 @@ router.get('/watchlist', cors.corsWithOptions, authenticate.verifyUser, async (r
     }
 });
 
-// GET /letterboxd/stats  (admin only)
-router.get('/stats', cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res) => {
-    res.json(cache.getStats());
-});
 
 module.exports = router;

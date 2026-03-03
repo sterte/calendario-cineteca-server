@@ -24,6 +24,7 @@ const popupDayRouter = require('./routes/popupDayRouter');
 const popupMovieRouter = require('./routes/popupMovieRouter');
 const imdbRouter = require('./routes/imdbRouter');
 const letterboxdRouter = require('./routes/letterboxdRouter');
+const cacheRouter = require('./routes/cacheRouter');
 
 const mongoose = require('mongoose');
 
@@ -61,6 +62,7 @@ app.use('/popup-day', popupDayRouter);
 app.use('/popup-movies', popupMovieRouter);
 app.use('/imdb', imdbRouter);
 app.use('/letterboxd', letterboxdRouter);
+app.use('/cache', cacheRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
