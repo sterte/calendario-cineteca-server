@@ -18,7 +18,7 @@ router.get('/', cors.corsWithOptions, authenticate.verifyUser, async (req, res, 
     if (!title || !year) return res.status(400).json({ error: 'title and year required' });
 
     const cacheKey = `imdb:${title}:${year}`;
-    const cached = cache.get(cacheKey);
+    const cached = await cache.get(cacheKey);
     if (cached) return res.json(cached);
 
     try {
@@ -48,7 +48,7 @@ router.get('/', cors.corsWithOptions, authenticate.verifyUser, async (req, res, 
             imdbRating: data.ratings.rating,
             imdbRatingCount: data.ratings.ratingCount
         };
-        cache.set(cacheKey, result);
+        await cache.set(cacheKey, result);
         res.json(result);
     } catch (err) {
         next(err);

@@ -1,60 +1,65 @@
+const admin = require('firebase-admin');
+const COLLECTION = 'apiCache';
 const TTL = 7 * 24 * 60 * 60 * 1000; // 1 week
 
 class ApiCache {
     constructor() {
-        this._store = new Map();
         this.stats = { hits: 0, misses: 0, reloads: 0 };
     }
 
-    get(key) {
-        if (!this._store.has(key)) {
-            this.stats.misses++;
-            return null;
-        }
-        const { data, fetchedAt } = this._store.get(key);
-        if (Date.now() - fetchedAt > TTL) {
+    _col() { return admin.firestore().collection(COLLECTION); }
+    _doc(key) { return this._col().doc(key.replace(/\//g, '|')); }
+
+    async get(key) {
+        const snap = await this._doc(key).get();
+        if (!snap.exists) { this.stats.misses++; return null; }
+        const { data, expiresAt } = snap.data();
+        if (Date.now() > expiresAt) {
             this.stats.reloads++;
-            return null; // expired — caller will re-fetch and set()
+            await this._doc(key).delete();
+            return null;
         }
         this.stats.hits++;
         return data;
     }
 
-    set(key, data) {
-        this._store.set(key, { data, fetchedAt: Date.now() });
-    }
-
-    clear(prefix) {
-        if (prefix) {
-            for (const k of this._store.keys()) {
-                if (k.startsWith(prefix)) this._store.delete(k);
-            }
-        } else {
-            this._store.clear();
-        }
-    }
-
-    getContent() {
+    async set(key, data) {
         const now = Date.now();
+        await this._doc(key).set({ key, data, fetchedAt: now, expiresAt: now + TTL });
+    }
+
+    async clear(prefix) {
+        const query = prefix
+            ? this._col().where('key', '>=', prefix).where('key', '<', prefix + '\uffff')
+            : this._col();
+        const snap = await query.get();
+        const batch = admin.firestore().batch();
+        snap.docs.forEach(doc => batch.delete(doc.ref));
+        await batch.commit();
+    }
+
+    async getContent() {
+        const now = Date.now();
+        const snap = await this._col().get();
         const result = {};
-        for (const [k, { data, fetchedAt }] of this._store.entries()) {
-            result[k] = { data, fetchedAt: new Date(fetchedAt).toISOString(), expiresIn: Math.round((TTL - (now - fetchedAt)) / 1000) + 's' };
-        }
+        snap.docs.forEach(doc => {
+            const { key, data, fetchedAt, expiresAt } = doc.data();
+            result[key] = { data, fetchedAt: new Date(fetchedAt).toISOString(), expiresIn: Math.round((expiresAt - now) / 1000) + 's' };
+        });
         return result;
     }
 
-    getStats() {
+    async getStats() {
+        const snap = await this._col().get();
         let imdb = 0, lbFilm = 0, lbMember = 0, lbWatchlist = 0;
-        for (const k of this._store.keys()) {
+        snap.docs.forEach(doc => {
+            const k = doc.data().key || '';
             if (k.startsWith('imdb:')) imdb++;
             else if (k.startsWith('lb:film:')) lbFilm++;
             else if (k.startsWith('lb:member:')) lbMember++;
             else if (k.startsWith('lb:watchlist:')) lbWatchlist++;
-        }
-        return {
-            ...this.stats,
-            entries: { total: this._store.size, imdb, lbFilm, lbMember, lbWatchlist }
-        };
+        });
+        return { ...this.stats, entries: { total: snap.size, imdb, lbFilm, lbMember, lbWatchlist } };
     }
 }
 

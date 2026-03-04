@@ -18,7 +18,7 @@ router.get('/film', cors.corsWithOptions, authenticate.verifyUser, async (req, r
     if (!title || !year) return res.status(400).json({ error: 'title and year required' });
 
     const cacheKey = `lb:film:${title}:${year}`;
-    const cached = cache.get(cacheKey);
+    const cached = await cache.get(cacheKey);
     if (cached) return res.json(cached);
 
     try {
@@ -50,7 +50,7 @@ router.get('/film', cors.corsWithOptions, authenticate.verifyUser, async (req, r
         const lbUrl = match.links?.[0]?.url || match.link || match.url || `https://letterboxd.com/film/${slug}/`;
 
         const result = { lbSlug: slug, lbRating, lbUrl };
-        cache.set(cacheKey, result);
+        await cache.set(cacheKey, result);
         res.json(result);
     } catch (err) {
         next(err);
@@ -66,7 +66,7 @@ router.get('/watchlist', cors.corsWithOptions, authenticate.verifyUser, async (r
     try {
         // Step 1: resolve username → memberId (cached)
         const memberKey = `lb:member:${username.toLowerCase()}`;
-        let memberData = cache.get(memberKey);
+        let memberData = await cache.get(memberKey);
         if (!memberData) {
             const memberRes = await fetch(
                 `https://${LB_HOST}/api/letterboxd/search?input=${encodeURIComponent(username)}`,
@@ -88,14 +88,14 @@ router.get('/watchlist', cors.corsWithOptions, authenticate.verifyUser, async (r
             const memberId = memberItem.id || memberItem.memberId;
             if (!memberId) throw new Error('Member ID not found for: ' + username);
             memberData = { memberId };
-            cache.set(memberKey, memberData);
+            await cache.set(memberKey, memberData);
         }
 
         const { memberId } = memberData;
 
         // Step 2: fetch full paginated watchlist (cached)
         const watchlistKey = `lb:watchlist:${memberId}`;
-        let filmSlugs = cache.get(watchlistKey);
+        let filmSlugs = await cache.get(watchlistKey);
         if (!filmSlugs) {
             filmSlugs = [];
             const baseUrl = `https://${LB_HOST}/api/letterboxd/member/${encodeURIComponent(memberId)}/watchlist`;
@@ -137,7 +137,7 @@ router.get('/watchlist', cors.corsWithOptions, authenticate.verifyUser, async (r
                 }
             }
 
-            cache.set(watchlistKey, filmSlugs);
+            await cache.set(watchlistKey, filmSlugs);
         }
 
         res.json({ inWatchlist: filmSlugs.includes(filmSlug) });
