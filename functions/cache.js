@@ -1,20 +1,27 @@
 const CacheEntry = require('./models/cacheEntry');
+const DailyStat  = require('./models/dailyStat');
 const TTL = 7 * 24 * 60 * 60 * 1000; // 1 week
 
-class ApiCache {
-    constructor() {
-        this.stats = { hits: 0, misses: 0, reloads: 0 };
-    }
+const today = () => new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD'
 
+const incStat = (field) => {
+    DailyStat.updateOne(
+        { date: today() },
+        { $inc: { [field]: 1 } },
+        { upsert: true }
+    ).catch(err => console.error('DailyStat update error:', err.message));
+};
+
+class ApiCache {
     async get(key) {
         const entry = await CacheEntry.findOne({ key });
-        if (!entry) { this.stats.misses++; return null; }
+        if (!entry) { incStat('misses'); return null; }
         if (Date.now() > entry.expiresAt) {
-            this.stats.reloads++;
+            incStat('reloads');
             await CacheEntry.deleteOne({ key });
             return null;
         }
-        this.stats.hits++;
+        incStat('hits');
         return entry.data;
     }
 
@@ -47,16 +54,29 @@ class ApiCache {
     }
 
     async getStats() {
-        const entries = await CacheEntry.find({}, 'key');
+        const [entries, history] = await Promise.all([
+            CacheEntry.find({}, 'key'),
+            DailyStat.find({}).sort({ date: -1 }).limit(30).lean(),
+        ]);
+
         let imdb = 0, lbFilm = 0, lbMember = 0, lbWatchlist = 0;
         entries.forEach(e => {
             const k = e.key || '';
-            if (k.startsWith('imdb:')) imdb++;
-            else if (k.startsWith('lb:film:')) lbFilm++;
-            else if (k.startsWith('lb:member:')) lbMember++;
+            if (k.startsWith('imdb:'))         imdb++;
+            else if (k.startsWith('lb:film:'))      lbFilm++;
+            else if (k.startsWith('lb:member:'))    lbMember++;
             else if (k.startsWith('lb:watchlist:')) lbWatchlist++;
         });
-        return { ...this.stats, entries: { total: entries.length, imdb, lbFilm, lbMember, lbWatchlist } };
+
+        return {
+            entries: { total: entries.length, imdb, lbFilm, lbMember, lbWatchlist },
+            history: history.map(d => ({
+                date:    d.date,
+                hits:    d.hits,
+                misses:  d.misses,
+                reloads: d.reloads,
+            })),
+        };
     }
 }
 
