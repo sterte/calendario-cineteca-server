@@ -47,7 +47,8 @@ exports.parseMovie = (movie, key = -1) => {
                 let infoItem = specialInfo[i];
                 let exhibitions = infoItem.getElementsByClassName('exhibition');
                 let specialEvents = infoItem.getElementsByClassName('special-event');
-                exhibitions = [...exhibitions, ...specialEvents];
+                let repeatInfos = infoItem.getElementsByClassName('repeat-info');
+                exhibitions = [...exhibitions, ...specialEvents, ...repeatInfos];
                 for(let item of exhibitions){
                     item = item.getElementsByClassName('c-repeat-loop__info-item-text');
                     if(item.length){

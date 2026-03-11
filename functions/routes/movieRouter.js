@@ -75,16 +75,17 @@ const parseMovieDetail = (html, originalUrl) => {
         const isVO = parsed.getElementsByClassName('c-show-single-repeat-sidebar__item-title')[0].innerHTML.includes('Originale');        
   
 
-        let extras = parsed.getElementsByClassName('c-show-single-repeat-content__bar-info-item--special-event-info');
+        const extraClasses = [
+            'c-show-single-repeat-content__bar-info-item--special-event-info',
+            'c-show-single-repeat-content__repeat-info-content',
+        ];
         let extrasString = '';
-        if(extras.length > 0){
-            for(let i=0;i<extras.length;i++){                          
-                let extra = extras[i];
-                if(i > 0){
-                    extrasString = extrasString + '<br>'
-                }
-                extrasString = extrasString + extra.innerHTML;
-            }            
+        for (const cls of extraClasses) {
+            const nodes = parsed.getElementsByClassName(cls);
+            for (let i = 0; i < nodes.length; i++) {
+                if (extrasString) extrasString += '<br>';
+                extrasString += nodes[i].innerHTML;
+            }
         }
 
         extras = parsed.getElementsByClassName('c-show-single-repeat-part-of__item-content');
