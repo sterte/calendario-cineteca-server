@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('./cors');
 const DOMParser = require('dom-parser');
+const { decodeEntities } = require('../parseUtils');
 
 const popupUrl = 'https://popupcinema.18tickets.it';
 const monthNamesShort = ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'];
@@ -99,7 +100,7 @@ const getMovieOption = (parsed, labelText) => {
     const opts = parsed.getElementsByClassName('movie__option');
     for (let i = 0; i < opts.length; i++) {
         if (opts[i].innerHTML && opts[i].innerHTML.includes(labelText)) {
-            return opts[i].textContent.replace(labelText, '').trim();
+            return decodeEntities(opts[i].textContent.replace(labelText, '').trim());
         }
     }
     return '';
@@ -111,7 +112,7 @@ const parsePopupMovieDetail = async (html, movieId, csrf, cookie) => {
 
     // Title: h5.page-heading (strip " - ORIGINAL VERSION" suffix)
     const headings = parsed.getElementsByClassName('page-heading');
-    let rawTitle = headings.length ? headings[0].textContent.trim() : '';
+    let rawTitle = headings.length ? decodeEntities(headings[0].textContent.trim()) : '';
     const isVO = /original version/i.test(rawTitle) || getMovieOption(parsed, 'Lingua:').toLowerCase().includes('originale');
     const title = rawTitle.replace(/\s*-\s*ORIGINAL VERSION\s*$/i, '').trim();
 
