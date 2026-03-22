@@ -16,7 +16,7 @@ Ricevi i seguenti parametri:
 - anno: {{year}}
 - spoiler: {{spoiler}}
 
-Fornisci una scheda sintetica del film rispettando ESCLUSIVAMENTE la seguente struttura HTML.
+Fornisci una scheda sintetica del film rispettando ESCLUSIVAMENTE la seguente struttura HTML. NON deve esserci niente oltre al HTML. Non devi mettere delimitatori come \`\`\`html per nessun motivo.
 
 Struttura obbligatoria:
 
@@ -45,9 +45,12 @@ Regole contenuto:
 - Mantieni tono neutro e informativo.
 - Non inserire opinioni personali o giudizi critici.
 - Risposta massima: 250 parole.
-- Non aggiungere testo fuori dal blocco HTML.
+- Non aggiungere testo fuori dal blocco HTML. NON deve esserci niente oltre al HTML. Non devi mettere delimitatori come \`\`\`html per nessun motivo.
 - Non usare markdown.
-- Restituisci esclusivamente HTML valido.`,
+- Restituisci esclusivamente HTML valido.
+- Fai un controllo di vlaidazione dell'effettiva esistenza del film e congruenza dele tue informaizoni, facendo ricerche rapide su imdb e letterboxd tramite il titolo originale.
+- Se dopo il passo di validazione non trovi nulla o non sei sicuro di avere individutao il film corretto dillo esplicitamente e chiedi ulteriori informaizoni all'utente.
+- Se non sei sicuro di avere individuato correttamente il film NON inventarne la trama eil cast per nessun motivo!!!`,
         user: 'Procedi.'
     },
     similar: {
@@ -86,7 +89,10 @@ Regole:
 - Non usare markdown.
 - Non aggiungere testo fuori dal blocco HTML.
 - Non utilizzare tag diversi da quelli indicati.
-- Non inserire attributi inline.`,
+- Non inserire attributi inline.
+- Fai un controllo di vlaidazione dell'effettiva esistenza del film e congruenza dele tue informaizoni, facendo ricerche rapide su imdb e letterboxd tramite il titolo originale.
+- Se dopo il passo di validazione non trovi nulla o non sei sicuro di avere individutao il film corretto dillo esplicitamente e chiedi ulteriori informaizoni all'utente.
+- Se non sei sicuro di avere individuato correttamente il film NON inventarne la trama eil cast per nessun motivo!!!`,
         user: 'Procedi.'
     }
 };
