@@ -4,7 +4,13 @@ exports.decodeEntities = (text) => text
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
-    .replace(/&apos;/g, "'");
+    .replace(/&apos;/g, "'")
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&ndash;/g, '–')
+    .replace(/&mdash;/g, '—')
+    .replace(/&agrave;/gi, 'à').replace(/&egrave;/gi, 'è')
+    .replace(/&igrave;/gi, 'ì').replace(/&ograve;/gi, 'ò')
+    .replace(/&ugrave;/gi, 'ù').replace(/&eacute;/gi, 'é');
 
 
 exports.parseMovie = (movie, key = -1) => {

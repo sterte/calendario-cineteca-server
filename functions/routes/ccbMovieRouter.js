@@ -15,12 +15,7 @@ const weekDayMap = {
     'domenica': 'Domenica'
 };
 
-// Decode common Italian HTML entities (dom-parser returns raw entities in textContent)
-const decodeEntities = (str) => str
-    .replace(/&agrave;/gi, 'à').replace(/&egrave;/gi, 'è')
-    .replace(/&igrave;/gi, 'ì').replace(/&ograve;/gi, 'ò')
-    .replace(/&ugrave;/gi, 'ù').replace(/&eacute;/gi, 'é')
-    .replace(/&amp;/g, '&').replace(/&#(\d+);/g, (_, n) => String.fromCharCode(n));
+const { decodeEntities } = require('../parseUtils');
 
 const ccbMovieRouter = express.Router();
 ccbMovieRouter.use(bodyParser.json());
