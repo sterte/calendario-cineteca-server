@@ -9,6 +9,7 @@ const compression = require('compression');
 const helmet = require('helmet');
 const authenticate = require('./authenticate');
 const config = require('./config');
+const rateLimit = require('express-rate-limit');
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
@@ -44,6 +45,7 @@ const app = express();
 
 app.use(helmet());
 app.use(compression());
+app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 300, standardHeaders: true, legacyHeaders: false }));
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

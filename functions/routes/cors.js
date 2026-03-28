@@ -22,5 +22,5 @@ var corsOptionDelegate = (req, cb) => {
 };
 
 
-exports.cors = cors();
+exports.cors = cors(corsOptionDelegate);
 exports.corsWithOptions = cors(corsOptionDelegate);
