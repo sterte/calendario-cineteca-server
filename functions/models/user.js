@@ -38,6 +38,10 @@ var User = new Schema({
     letterboxdUsername: {
         type: String,
         default: ''
+    },
+    preferredCalendar: {
+        type: String,
+        default: ''
     }
 });
 

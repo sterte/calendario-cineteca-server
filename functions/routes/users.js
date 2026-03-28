@@ -201,20 +201,21 @@ router.post('/reset-password', cors.corsWithOptions, async (req, res, next) => {
 
 // GET /users/preferences
 router.get('/preferences', cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
-    const { imdbEnabled, letterboxdEnabled, letterboxdUsername, email } = req.user;
-    res.json({ imdbEnabled, letterboxdEnabled, letterboxdUsername, email: email || '' });
+    const { imdbEnabled, letterboxdEnabled, letterboxdUsername, preferredCalendar, email } = req.user;
+    res.json({ imdbEnabled, letterboxdEnabled, letterboxdUsername, preferredCalendar: preferredCalendar || '', email: email || '' });
 });
 
 // PUT /users/preferences  { imdbEnabled, letterboxdEnabled, letterboxdUsername }
 router.put('/preferences', cors.corsWithOptions, authenticate.verifyUser, async (req, res, next) => {
     try {
-        const { imdbEnabled, letterboxdEnabled, letterboxdUsername } = req.body;
+        const { imdbEnabled, letterboxdEnabled, letterboxdUsername, preferredCalendar } = req.body;
         const user = await User.findById(req.user._id);
         if (imdbEnabled !== undefined) user.imdbEnabled = imdbEnabled;
         if (letterboxdEnabled !== undefined) user.letterboxdEnabled = letterboxdEnabled;
         if (letterboxdUsername !== undefined) user.letterboxdUsername = letterboxdUsername.trim();
+        if (preferredCalendar !== undefined) user.preferredCalendar = preferredCalendar;
         await user.save();
-        res.json({ imdbEnabled: user.imdbEnabled, letterboxdEnabled: user.letterboxdEnabled, letterboxdUsername: user.letterboxdUsername });
+        res.json({ imdbEnabled: user.imdbEnabled, letterboxdEnabled: user.letterboxdEnabled, letterboxdUsername: user.letterboxdUsername, preferredCalendar: user.preferredCalendar });
     } catch (err) {
         next(err);
     }
