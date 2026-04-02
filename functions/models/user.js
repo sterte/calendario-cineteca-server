@@ -42,6 +42,10 @@ var User = new Schema({
     preferredCalendar: {
         type: String,
         default: ''
+    },
+    autoSwitchTab: {
+        type: Boolean,
+        default: true
     }
 });
 
